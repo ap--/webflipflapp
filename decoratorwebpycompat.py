@@ -102,9 +102,11 @@ class WebPyOAuth2DecoratorFromClientSecrets(
                 else:
                     user = users.get_current_user()
                     ruri = web.ctx.home + web.ctx.fullpath
-                    ruri = decorator._FakeWebApp('','',ruri)
-                    decorator._create_flow(web.ctx.fullpath) #ruri
-                    data.code
+                    try:
+                        ruri = decorator._FakeWebApp("", "", str(ruri))
+                        decorator._create_flow(ruri) #ruri
+                    except Exception as e:
+                        return 'error when creating flow! %s %s' % (e, web.ctx.fullpath)
                     try:
                         credentials = decorator.flow.step2_exchange(
                                                 code=unicode(data.code))

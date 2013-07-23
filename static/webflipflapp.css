@@ -62,3 +62,26 @@ a:active {
 color: #576975;
 font-weight: bold;
 }
+
+.drivetable {
+width: 550px;
+border-width: 0px;
+border-style: solid;
+border-color: #000;
+}
+
+.drivetableeven {
+background-color: #F2F2F2;
+}
+.drivetableodd {
+background-color: #E8E8E8;
+}
+.drivetableheader {
+background-color: #333333;
+color: #F2F2F2;
+text-align: left;
+margin-left: 0px;
+margin-top: 0px;
+margin-right: 0px;
+margin-bottom: 0px;
+}
