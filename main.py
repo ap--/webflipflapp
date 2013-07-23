@@ -12,6 +12,7 @@ import web
 from decoratorwebpycompat import WebPyOAuth2DecoratorFromClientSecrets
 
 import apgooglelayer.drive
+import apgooglelayer.calendar
 
 #
 # Setup drive and calendar services
@@ -26,7 +27,7 @@ decorator = WebPyOAuth2DecoratorFromClientSecrets(
                        'https://www.googleapis.com/auth/calendar'])
 
 GoogleDrive = apgooglelayer.drive.GoogleDrive(drive_service)
-
+GoogleCalendar = apgooglelayer.calendar.GoogleCalendar(calendar_service)
 #
 # RequestHandlers
 #
@@ -45,18 +46,18 @@ class Drive:
     @decorator.oauth_required
     def GET(self):
         http = decorator.http()
-        about = GoogleDrive.about(http=http)
         tree = GoogleDrive.folder_structure(http=http)
         ident = GoogleDrive.files_as_id_dict(
                 fields='items(id,title,iconLink)', http=http)
-        return render.drive(about['user']['displayName'], tree, ident)
+        return render.drive(tree, ident)
 
 
 class Calendar:
     @decorator.oauth_required
     def GET(self):
         http = decorator.http()
-        return 'Hello Calendar'
+        cl = GoogleCalendar.listcalendars(http=http)       
+        return render.calendar(cl)
 
 
 class Boxes:

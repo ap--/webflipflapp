@@ -50,17 +50,19 @@ height: 40px;
 
 a:link {
 color: #465864;
+text-decoration: none;
 }
 a:visited {
 color: #465864;
+text-decoration: none;
 }
 a:hover {
 color: #465864;
-font-weight: bold;
+text-decoration: underline;
 }
 a:active {
 color: #576975;
-font-weight: bold;
+text-decoration: underline;
 }
 
 .drivetable {
