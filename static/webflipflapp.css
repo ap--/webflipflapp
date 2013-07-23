@@ -1,0 +1,27 @@
+
+td {
+border-width: 1px;
+border-style: solid;
+border-color: #000;    
+}
+
+.tablerow {
+height: 40px
+}
+
+.tablecol1 {
+width: 40px;
+}
+.tablecol2 {
+width: 40px;
+}
+.tablecol3 {
+width: 40px;
+}
+
+.arr {
+background-color:#EEE;
+}
+.arr-hover {
+background-color:#CCC;
+}

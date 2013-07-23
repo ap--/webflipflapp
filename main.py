@@ -1,32 +1,53 @@
 #!/usr/bin/env python
+#
+# Imports
+#
 
 import os
-import web
-
 from apiclient.discovery import build
+
+""" using web.py with gae.
+    decoratorwebpycompat provides Decorator syntax for webpy """
+import web
 from decoratorwebpycompat import WebPyOAuth2DecoratorFromClientSecrets
 
-service = build('drive', 'v2')
+import apgooglelayer.drive
+
+#
+# Setup drive and calendar services
+#
+
+drive_service = build('drive', 'v2')
+calendar_service = build('calendar', 'v3')
+
 decorator = WebPyOAuth2DecoratorFromClientSecrets(
                 os.path.join(os.path.dirname(__file__), 'client_secrets.json'),
-                'https://www.googleapis.com/auth/drive')
-                
+                scope=['https://www.googleapis.com/auth/drive',
+                       'https://www.googleapis.com/auth/calendar'])
 
-class Index:
+GoogleDrive = apgooglelayer.drive.GoogleDrive(drive_service)
 
+#
+# RequestHandlers
+#
+
+render = web.template.render('templates/')
+
+class index:
+    
     @decorator.oauth_aware
     def GET(self):
-        return ('Hello: has %s\n'
-                '       goto "%s"\n'
-                ' AND %s')%(str(decorator.has_credentials()),
-                                     decorator.authorize_url(),
-                                     str(web.ctx))
+        has_cred = decorator.has_credentials()
+        auth_url = decorator.authorize_url()
+        return render.index(has_cred, auth_url)
 
 class Drive:
     @decorator.oauth_required
     def GET(self):
         http = decorator.http()
-        return 'Hello Drive'
+        about = GoogleDrive.about(http=http)
+        return ('Hello Drive:\n'
+                ' name: %s\n') % about['user']['displayName']
 
 class Calendar:
     def GET(self):
@@ -37,17 +58,20 @@ class Boxes:
     def GET(self):
         return 'Hello Boxes %s' % __name__
 
-WebPyOAuth2 = decorator.callback_handler()
+#
+# URLS
+#
 
-urls = ( "/",           "Index",
+WebPyOAuth2 = decorator.callback_handler()
+urls = ( "/",           "index",
          "/drive",      "Drive",
          "/calendar",   "Calendar",
          "/boxes",      "Boxes",
          decorator.callback_path, "WebPyOAuth2",
        )
-
 app = web.application(urls, globals())
 
+# GoogleAppEngine name, used in app.yaml
 appgae = app.wsgifunc()
 
 

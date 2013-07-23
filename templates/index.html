@@ -1,0 +1,21 @@
+$def with (credentials, auth_url)
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/static/webflipflap.css"> 
+<script src="/static/jquery-2.0.3.min.js"></script>
+<script>
+</script>
+</head>
+<body>
+<div class="header">
+<h1>WebFlipFlapp</h1>
+<p>Orginaze your living stuff!</p>
+</div>
+<div class="docbody">
+$if credentials:    
+    <p>hello, you have granted access.</p>
+$else:
+    <p>hello, you did not grant access yet. please authorize <a href="$(auth_url)">here</a>.</p>
+</div>
+</body>
+</html>
