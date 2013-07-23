@@ -1,27 +1,64 @@
-
-td {
-border-width: 1px;
-border-style: solid;
-border-color: #000;    
+html *
+{
+font-family: Verdana, Geneva, sans-serif !important;
 }
 
-.tablerow {
-height: 40px
+h1 {
+font-size: 2em;
+color: #465864;
+text-align: left;
+text-shadow: 2px 2px #DDDDDD;
+}
+h2 {
+font-size: 1em;
+color: #888888;
+font-style: italic;
+font-weight: normal;
+margin-top: -10px;
 }
 
-.tablecol1 {
-width: 40px;
-}
-.tablecol2 {
-width: 40px;
-}
-.tablecol3 {
-width: 40px;
+.mainheading {
+font-size: 1.3em;
+color: #222222;
+text-align: left;
 }
 
-.arr {
-background-color:#EEE;
+.wholedoc {
+width: 600px;
+margin-left: auto;
+margin-right: auto;
 }
-.arr-hover {
-background-color:#CCC;
+
+.docheader {
+width: 600px
+margin-left: 0px;
+}
+
+.docbody {
+width: 550px;
+margin-left: 30px;
+}
+
+.info {
+width: 550px;
+text-align: left;
+}
+
+#footspacer {
+height: 40px;
+}
+
+a:link {
+color: #465864;
+}
+a:visited {
+color: #465864;
+}
+a:hover {
+color: #465864;
+font-weight: bold;
+}
+a:active {
+color: #576975;
+font-weight: bold;
 }

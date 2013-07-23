@@ -34,7 +34,6 @@ GoogleDrive = apgooglelayer.drive.GoogleDrive(drive_service)
 render = web.template.render('templates/')
 
 class index:
-    
     @decorator.oauth_aware
     def GET(self):
         has_cred = decorator.has_credentials()
