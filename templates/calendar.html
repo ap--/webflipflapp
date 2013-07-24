@@ -1,4 +1,4 @@
-$def with (cl)
+$def with (cl, selected)
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
@@ -19,14 +19,20 @@ from __future__ import webflipflapp!</h2>
 <p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
 <div class='info'>If you want to create a new calendar, please do that via the <a href="https://www.google.com/calendar">Google Calendar</a> web interface. Refresh this page after and do not bug the developer.</div>
 <p class='mainheading'>Your Google Calendars</p>
+<form name='input' action="/calendar" method='get'>
 <div class='info'>Choose a calendar that is used to store reminders.</div>
-<form action="">
 <table class='drivetable'>
     <tr class='drivetableheader'>
         <th>Calendar</th>
         <th>Choice</th>
     </tr>
+$ clname = ''
 $for name, cid in cl.iteritems():
+    $ checked = ''
+    $if selected is not None:
+        $if selected == cid:
+            $ checked = ' checked'
+            $ clname = name
     $if loop.even:
         <tr class='drivetableeven'>
     $else:
@@ -35,12 +41,19 @@ $for name, cid in cl.iteritems():
     <div>$name</div>
     </td>
     <td style='text-align:center'>
-    <input type="radio" name="sheet" value="$cid"></td>
+    <input type="radio" name="sheet" value="$cid"$(checked)></td>
     </tr>
 </table>
+<div class='info' style='text-align:right'><input type='submit' value='Choose'></div>
 </form>
+<p class='mainheading'>Selected Calendar</p>
+<div class='info'>
+$if selected is not None:
+    You selected calendar: '$(clname)' for storing reminders.
+$else:
+    You haven't selected a calendar yet.
 </div>
-
+</div>
 <div id='footspacer'></div>
 <img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" />
 </div>

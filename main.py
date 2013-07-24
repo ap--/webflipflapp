@@ -55,9 +55,10 @@ class Drive:
 class Calendar:
     @decorator.oauth_required
     def GET(self):
+        selected = web.input(sheet=None).sheet
         http = decorator.http()
         cl = GoogleCalendar.listcalendars(http=http)       
-        return render.calendar(cl)
+        return render.calendar(cl, selected)
 
 
 class Boxes:
