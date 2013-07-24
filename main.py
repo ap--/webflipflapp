@@ -14,6 +14,9 @@ from decoratorwebpycompat import WebPyOAuth2DecoratorFromClientSecrets
 import apgooglelayer.drive
 import apgooglelayer.calendar
 
+import gdata.spreadsheets.client
+from oauth2client_gdata_bridge import OAuth2BearerToken
+
 #
 # Setup drive and calendar services
 #
@@ -24,10 +27,16 @@ calendar_service = build('calendar', 'v3')
 decorator = WebPyOAuth2DecoratorFromClientSecrets(
                 os.path.join(os.path.dirname(__file__), 'client_secrets.json'),
                 scope=['https://www.googleapis.com/auth/drive',
-                       'https://www.googleapis.com/auth/calendar'])
+                       'https://www.googleapis.com/auth/calendar',
+                       'https://spreadsheets.google.com/feeds'])
 
 GoogleDrive = apgooglelayer.drive.GoogleDrive(drive_service)
 GoogleCalendar = apgooglelayer.calendar.GoogleCalendar(calendar_service)
+
+def SpreadsheetsClient():
+    token = OAuth2BearerToken(decorator.credentials)
+    return gdata.spreadsheets.client.SpreadsheetsClient(auth_token=token)
+
 #
 # RequestHandlers
 #
@@ -45,11 +54,12 @@ class Index:
 class Drive:
     @decorator.oauth_required
     def GET(self):
+        selected = web.input(sheet=None).sheet
         http = decorator.http()
         tree = GoogleDrive.folder_structure(http=http)
         ident = GoogleDrive.files_as_id_dict(
-                fields='items(id,title,iconLink)', http=http)
-        return render.drive(tree, ident)
+                fields='items(id,title,iconLink,mimeType)', http=http)
+        return render.drive(tree, ident, selected)
 
 
 class Calendar:
@@ -62,8 +72,10 @@ class Calendar:
 
 
 class Boxes:
+    @decorator.oauth_required
     def GET(self):
-        return 'Hello Boxes %s' % __name__
+        d = SpreadsheetsClient().get_worksheets('0AvA5wEfgv_7FdHQxWjYzblJyUW9QR0dCTDVMN2NxTFE')
+        return 'Hello Boxes %s' % str(d)
 
 #
 # URLS

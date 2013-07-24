@@ -1,4 +1,4 @@
-$def with (tree, ident)
+$def with (tree, ident, selected)
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
@@ -20,13 +20,19 @@ from __future__ import webflipflapp!</h2>
 <div class='info'>If you want to create a new spreadsheet, please do that via the <a href="https://drive.google.com">Google Drive</a> web interface. Choose one of the offered template(s) (<a href='/static/flytemplate.ods'>flytemplate</a>), upload it to your Google Drive and name it after your grandma's uncle's second dog. Refresh this page after and do not bug the developer. Currently there's only one template.</div>
 <p class='mainheading'>Your Google Drive</p>
 <div class='info'>Choose a compatible spreadsheet file that is used as the storage backend for your things.</div>
-<form action="">
+<form name='input' action="/drive" method='get'>
 <table class='drivetable'>
     <tr class='drivetableheader'>
         <th>Filename</th>
         <th>Choice</th>
     </tr>
+$ clname = ''
 $for level, value in tree.walkthrough():
+    $ checked = ''
+    $if selected is not None:
+        $if selected == value.file_id:
+            $ checked = ' checked'
+            $ clname = ident[value.file_id]['title']
     $ name = ident[value.file_id]['title']
     $ icon = ident[value.file_id]['iconLink']
     $ ind = 20*level+6
@@ -38,10 +44,19 @@ $for level, value in tree.walkthrough():
     <div style='text-indent:$(ind)px'><img src="$(icon)"/>$name</div>
     </td>
     <td style='text-align:center'>
-    <input type="radio" name="sheet" value="$value.file_id"></td>
+    <input type="radio" name="sheet" value="$value.file_id"$(checked)></td>
     </tr>
 </table>
+<div class='info' style='text-align:right'><input type='submit' value='Choose'></div>
 </form>
+<p class='mainheading'>Selected Spreadsheet</p>
+<div class='info'>
+$if selected is not None:
+    You selected spreadsheet: '$(clname)' for storing reminders.
+$else:
+    You haven't selected a spreadsheet yet.
+</div>
+
 </div>
 
 <div id='footspacer'></div>
