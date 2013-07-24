@@ -1,0 +1,65 @@
+$def with (boxes, ss, cl)
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
+<script src="/static/jquery-2.0.3.min.js"></script>
+<script>
+</script>
+</head>
+<body>
+<div class="wholedoc">    
+<div class="docheader">
+<h1><a href="/">WebFlipFlapp</a></h1>
+<h2>from __past__ import why_do_i_forget_that_every_single_time<br/>
+from __future__ import webflipflapp!</h2>
+</div>
+<div class="menu">
+    <span class="menuheader">menu:</span>
+    <span class="menuitem"><a href="/drive">choose spreadsheet</a></span>
+    <span class="menuitem"><a href="/calendar">choose calendar</a></span>
+    <span class="menuitem"><a href="/boxes">view boxes</a></span>
+</div> 
+<div class="menu2">
+    <span class="menuheader2">using:</span>
+    <span class="menuitem2">ss '$ss'</span>
+    <span class="menuheader2">and</span>
+    <span class="menuitem2">cal '$cl'</span>
+</div> 
+<div class="docbody">
+
+<p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
+<div class='info'>If you want to modify some entries in the stock spreadsheet, please do that via the <a href="https://drive.google.com">Google Drive</a> web interface. And do not bug the developer.</div>
+
+<p class='mainheading'>Your Boxes</p>
+
+$for box in boxes:
+    $ bh = box['size'][0]
+    $ bw = box['size'][1]
+    $ name = box['name']
+    <div class='boxdiv'>
+    <table class='boxtable'>
+    <tr class='boxtableheader'>
+    <th colspan="$(bw)">$(name)</th>
+    </tr>
+    <tr class='boxtableheader'>
+    $for i in range(1,bw+1):
+        <th>$(box['labels'].get(i, ''))</th>
+    </tr>
+    $for j in range(1,bh+1):
+        $if j%2 == 0:
+            <tr class='boxtableeven'>
+        $else:
+            <tr class='boxtableodd'>
+        $for i in range(1,bw+1):
+            <td style='text-align:center'>$(box['elements'].get((j,i),''))</td>
+        </tr>
+    </table>
+    </div>
+    <div id='boxspacer'></div>
+</div>
+
+<div id='footspacer'></div>
+<img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" />
+</div>
+</body>
+</html>
