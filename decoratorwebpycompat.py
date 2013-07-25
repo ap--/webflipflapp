@@ -1,27 +1,52 @@
 #!/usr/bin/env python
-#
-#
 
-import httplib2
 import web
+import urlparse
 
-from google.appengine.api import memcache
-from google.appengine.api import users
-from oauth2client import appengine
+class _FakeWebObOut(object):
+    def __init__(self):
+        self._buffer = ''
+    def write(self, x):
+        self._buffer += x
+
+class _FakeWebObResponse(object):
+    def __init__(self):
+        self.out = _FakeWebObOut()
+
+class _FakeWebObRequest(object):
+    @property
+    def url(self):
+        return web.ctx.home + web.ctx.fullpath
+    @property
+    def uri(self):
+        return web.ctx.home + web.ctx.fullpath
+    def relative_url(self, x):
+        return urlparse.urljoin(self.uri, x)
+
+class FakeWebapp2RequestHandler(object):
+
+    def __init__(self):
+        if hasattr(self, 'GET'):
+            def hack(f):
+                def nGET(*args, **kwargs):
+                    tmp = f(*args, **kwargs)
+                    if self.response.out._buffer:
+                        return tmp + self.response.out._buffer
+                    else:
+                        return tmp
+                return nGET
+            self.GET = hack(self.GET)
+
+    response = _FakeWebObResponse()
+    request = _FakeWebObRequest()
+
+    def redirect(self, x):
+        web.seeother(x)
 
 
+"""
 class WebPyOAuth2DecoratorFromClientSecrets(
         appengine.OAuth2DecoratorFromClientSecrets):
-
-    class _FakeWebApp(object):
-        def __init__(self, url0, uri0, relurl):
-            class _FakeWebObRequest:
-                url = url0
-                uri = uri0
-                def ru(*args):
-                    return relurl
-                relative_url = ru
-            self.request = _FakeWebObRequest()
 
     def _display_error_message(self, *args):
         pass
@@ -32,13 +57,11 @@ class WebPyOAuth2DecoratorFromClientSecrets(
             if self._in_error:
                 return ('<html><body>%s</body></html>' % 
                             appengine._safe_html(self._message))
-            url = web.ctx.home + web.ctx.path
-            uri = web.ctx.home + web.ctx.fullpath
-            relurl = web.ctx.home + self.callback_path
-            request_handler = self._FakeWebApp(url, uri, relurl)
+            
+            request_handler = self._FakeWebApp(web.ctx)
             user = users.get_current_user()
             if not user:
-                raise web.seeother(users.create_login_url(uri))
+                raise web.seeother(users.create_login_url(request_handler.request.uri))
 
             self._create_flow(request_handler)
 
@@ -62,13 +85,11 @@ class WebPyOAuth2DecoratorFromClientSecrets(
             if self._in_error:
                 return ('<html><body>%s</body></html>' % 
                             appengine._safe_html(self._message))
-            url = web.ctx.home + web.ctx.path
-            uri = web.ctx.home + web.ctx.fullpath
-            relurl = web.ctx.home + self._callback_path
-            request_handler = self._FakeWebApp(url, uri, relurl)
+            
+            request_handler = self._FakeWebApp(web.ctx)
             user = users.get_current_user()
             if not user:
-                raise web.seeother(users.create_login_url(url))
+                raise web.seeother(users.create_login_url(request_handler.request.uri))
 
             self._create_flow(request_handler)
 
@@ -101,10 +122,9 @@ class WebPyOAuth2DecoratorFromClientSecrets(
                                 appengine._safe_html(errormsg))
                 else:
                     user = users.get_current_user()
-                    ruri = web.ctx.home + web.ctx.fullpath
                     try:
-                        ruri = decorator._FakeWebApp("", "", str(ruri))
-                        decorator._create_flow(ruri) #ruri
+                        decorator._FakeWebApp("", "", str(ruri))
+                        decorator._create_flow(dec) #ruri
                     except Exception as e:
                         return 'error when creating flow! %s %s' % (e, web.ctx.fullpath)
                     try:
@@ -136,5 +156,5 @@ class WebPyOAuth2DecoratorFromClientSecrets(
                     web.seeother(redirect_uri)
         
         return WebPyOAuth2Handler
-
+"""
 
