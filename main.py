@@ -1,15 +1,11 @@
 #!/usr/bin/env python
-#
-# Imports
-#
 
 import os
 from apiclient.discovery import build
 
-""" using web.py with gae.
-    decoratorwebpycompat provides Decorator syntax for webpy """
 import web
-from decoratorwebpycompat import WebPyOAuth2DecoratorFromClientSecrets
+from oauth2client.appengine import OAuth2DecoratorFromClientSecrets
+from oauth2client_webpy_bridge import FakeWebapp2RequestHandler
 
 import apgooglelayer.drive
 import apgooglelayer.calendar
@@ -20,220 +16,189 @@ from oauth2client_gdata_bridge import OAuth2BearerToken
 from google.appengine.ext import db
 from google.appengine.api import users
 
+import onlinetex
+
+
+#--------------------------------------------------
+# Defining the database stuff for userdata storage
+#
+
 class UserData(db.Model):
     spreadsheet_id = db.StringProperty()
     spreadsheet_name = db.StringProperty()
     calendar_id = db.StringProperty()
     calendar_name = db.StringProperty()
-              
+        
+    def get_names(self):
+        return self.spreadsheet_name, self.calendar_name
+
+    def has_spreadsheet(self):
+        return spreadsheey_id != ''
+
+    def has_calendar(self):
+        return spreadsheey_id != ''
+
+    def set_spreadsheet(self, _id, name):
+        self.spreadsheet_id = _id
+        self.spreadsheet_name = name
+        self.put()
+
+    def set_calendar(self, _id, name):
+        self.calendar_id = _id
+        self.calendar_name = name
+        self.put()
+
+
 def get_userdata(user):
-    if user:
-        userdata_k = db.Key.from_path('UserData', user.user_id())
-        userdata = db.get(userdata_k)
-        return userdata
+    userdata_k = db.Key.from_path('UserData', user.user_id())
+    userdata = db.get(userdata_k)
+    if userdata is None:
+        userdata = UserData(key_name=user.user_id(), 
+                        spreadsheet_id='', spreadsheet_name='no spreadsheet',
+                        calendar_id='', calendar_name='no calendar')
+        userdata.put()
+    return userdata
 
-import onlinetex
 
-#user = users.get_current_user()
-#if user:
-#    q = db.GqlQuery("SELECT * FROM UserPrefs WHERE userid = :1", user.user_id())
-#    userprefs = q.get()
-#
-# Setup drive and calendar services
-#
+#-------------------------------------------------
+# Setting up the OAuth2 authorization and google-
+#  api-interfaces
 
-drive_service = build('drive', 'v2')
-calendar_service = build('calendar', 'v3')
-
-decorator = WebPyOAuth2DecoratorFromClientSecrets(
+decorator = OAuth2DecoratorFromClientSecrets(
                 os.path.join(os.path.dirname(__file__), 'client_secrets.json'),
                 scope=['https://www.googleapis.com/auth/drive',
                        'https://www.googleapis.com/auth/calendar',
                        'https://spreadsheets.google.com/feeds'])
 
+drive_service = build('drive', 'v2')
+calendar_service = build('calendar', 'v3')
+
 GoogleDrive = apgooglelayer.drive.GoogleDrive(drive_service)
 GoogleCalendar = apgooglelayer.calendar.GoogleCalendar(calendar_service)
 
 def SpreadsheetsClient():
+    # this returns a authenticated spreadsheet client
     token = OAuth2BearerToken(decorator.credentials)
     return gdata.spreadsheets.client.SpreadsheetsClient(auth_token=token)
 
-def getmenu2(ud):
-    return ud.spreadsheet_name, ud.calendar_name
 
-#
+
+"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
+def printerrors(prefix):
+    def thedecorator(f):
+        def mydecorator(*args,**kwargs):
+            try:
+                return f(*args, **kwargs)
+            except Exception() as e:
+                return prefix + (' %s' % e)
+        return mydecorator
+    return thedecorator
+
+#-------------------------------------------------#
+# FINALLY, the web interface
 # RequestHandlers
 #
 
 render = web.template.render('templates/')
 
-class Index:
+class Index(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1034.5: we encountered a')
     @decorator.oauth_aware
     def GET(self):
-        try:
-            user = users.get_current_user()
-            ud = get_userdata(user)
-            if ud is None:
-                ud = UserData(key_name=user.user_id(),
-                                  spreadsheet_id='',
-                                  spreadsheet_name='no spreadsheet',
-                                  calendar_id='',
-                                  calendar_name='no calendar')
-                ud.put()
-            has_cred = decorator.has_credentials()
-            auth_url = decorator.authorize_url()
-            return render.index(has_cred, auth_url, *getmenu2(ud))
-        except Exception as e:
-            return 'hallo wie %s' % e
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        has_cred = decorator.has_credentials()
+        auth_url = decorator.authorize_url()
+        return render.index(has_cred, auth_url, *ud.get_names())
 
-class Drive:
+
+class Drive(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1051.2: He\'s dead Jim')
     @decorator.oauth_required
     def GET(self):
         user = users.get_current_user()
         ud = get_userdata(user)
-        try:
-            http = decorator.http()
-            tree = GoogleDrive.folder_structure(http=http)
-            ident = GoogleDrive.files_as_id_dict(
-                    fields='items(id,title,iconLink,mimeType)', http=http)
-            selected = web.input(sheet=None).sheet
-            if ud is None:
-                ud = UserData(key_name=user.user_id(),
-                              spreadsheet_id='',
-                              spreadsheet_name='no spreadsheet',
-                              calendar_id='',
-                              calendar_name='no calendar')
-                ud.put()
-            if selected is not None:
-                ud.spreadsheet_id = selected
-                ud.spreadsheet_name = ident[selected]['title']
-                ud.put()
-            else:
-                selected = ud.spreadsheet_id
+        http = decorator.http()
+        tree = GoogleDrive.folder_structure(http=http)
+        ident = GoogleDrive.files_as_id_dict(
+                fields='items(id,title,iconLink,mimeType)', http=http)
+        selected = web.input(sheet=None).sheet
+        if selected is not None:
+            ud.set_spreadsheet(selected, ident[selected]['title'])
 
-            return render.drive(tree, ident, selected, *getmenu2(ud))
-        except Exception as e:
-            return 'now it %s' % e
+        return render.drive(tree, ident, ud.spreadsheet_id, *ud.get_names())
 
 
-class Calendar:
+class Calendar(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1137.8: She\'s giving all she\'s got')
     @decorator.oauth_required
     def GET(self):
-        try:
-            user = users.get_current_user()
-            ud = get_userdata(user)
-            http = decorator.http()
-            cl = GoogleCalendar.listcalendars(http=http)       
-            selected = web.input(sheet=None).sheet
-            if ud is None:
-                ud = UserData(key_name=user.user_id(),
-                                  spreadsheet_id='',
-                                  spreadsheet_name='no spreadsheet',
-                                  calendar_id='',
-                                  calendar_name='no calendar')
-                ud.put()
-            if selected is not None:
-                ud.calendar_id = selected
-                for _e,_i in cl.iteritems():
-                    if _i == selected:
-                        ud.calendar_name = _e
-                        break
-                ud.put()
-            else:
-                selected = ud.calendar_id
-            return render.calendar(cl, selected, *getmenu2(ud))
-        except Exception as e:
-            return 'naw it %s' % e
-    
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        http = decorator.http()
+        cl = GoogleCalendar.listcalendars(http=http, key='id')       
+        selected = web.input(sheet=None).sheet
+        if selected is not None:
+            ud.set_calendar(selected, cl[selected])
+            
+        return render.calendar(cl, ud.calendar_id, *ud.get_names())
 
-class Boxes:
+
+class Boxes(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1407.1: You green blooded bastard')
     @decorator.oauth_required
     def GET(self):
-        try:
-            user = users.get_current_user()
-            ud = get_userdata(user)
-            if ud is None:
-                ud = UserData(key_name=user.user_id(),
-                                  spreadsheet_id='',
-                                  spreadsheet_name='no spreadsheet',
-                                  calendar_id='',
-                                  calendar_name='no calendar')
-                ud.put()
-            if not ud.spreadsheet_id:
-                web.seeother('/drive')
-            ss_id = ud.spreadsheet_id
-            client = SpreadsheetsClient()
-            wfeed = client.get_worksheets(ss_id)
-            warn_multiple_worksheets = False if len(wfeed.entry) < 2 else True
-            ws = wfeed.entry[0]
-            ROWS = int(ws.row_count.text)
-            ws_id = ws.get_worksheet_id()            
-            cfeed = client.get_cells(ss_id, ws_id)
-            store = []
-            for cell in cfeed.entry:
-                if int(cell.cell.row) < 3:
-                    continue
-                store.append((int(cell.cell.row), int(cell.cell.col), 
-                                cell.content.text))
-            store.sort()
-            #seperate boxes
-            BOXES = [[]]
-            y_old = y_off = store[0][0]
-            for y,x,v in store:
-                if y - y_old < 2:
-                    y_old = y
-                else:
-                    BOXES.append([])
-                    y_off = y_old = y
-                BOXES[-1].append((y-y_off,x,v))
-            #create name, labels, get row and col size
-            DBOXES = []
-            for box in BOXES:
-                d = { 'name'     : '',
-                      'labels'   : {},
-                      'elements' : {},
-                      'size'     : (1,1) }
-                ym, xm = -1, -1
-                for y,x,v in box:
-                    if y > ym: ym = y
-                    if x > xm: xm = x
-                    if y == 0 and x == 1:
-                        d['name'] = v
-                    if y == 1:
-                        d['labels'][x] = v
-                    if y > 1:
-                        d['elements'][(y,x)] = v
-                d['size'] = (ym,xm) #XXX tricky, but makes sense :)
-                DBOXES.append(d)
-            LG = onlinetex.LabelGenerator()
-            for b in DBOXES:
-                for j in range(2,b['size'][0]+1): 
-                    fly = { b['labels'][i] : b['elements'].get((j,i), '')
-                                    for i in range(1, b['size'][1]+1) }
-                    args = [ fly['Label'],
-                             fly['Modifier1']+fly['Modifier2']+fly['Modifier3'],
-                             fly['Short Identifier'],
-                             fly['Genotype'] ]
-                    LG.add_label(*args)
-                b['url'] = LG.pdflink()
-                LG.clear()
-            return render.boxes(DBOXES, *getmenu2(ud))
-        except Exception as e:
-            return 'We had a %s' % e
-#
-# URLS
-#
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        if not ud.spreadsheet_id:
+            web.seeother('/drive')
+        client = SpreadsheetsClient()
+        wfeed = client.get_worksheets(ud.spreadsheet_id)
+        ws = wfeed.entry[0]
+        ID = ud.spreadsheet_id, ws.get_worksheet_id()            
+        # get cells
+        store = [(int(cell.cell.row), int(cell.cell.col), cell.content.text)
+                for cell in client.get_cells(*ID).entry if int(cell.cell.row) >= 3]
+        #seperate boxes
+        BOXES = []
+        y_old = y_off = -2
+        ym, xm = 0, 0
+        for y,x,v in store:
+            if y - y_old < 2:
+                y_old = y
+            else:
+                y_off = y_old = y
+                BOXES.append({'size':[0,0]})
+            by, bx = y-y_off, x
+            BOXES[-1]['size'][:] = map(max,zip([by,bx],BOXES[-1]['size']))
+            if by == 0 and bx == 1: BOXES[-1]['name'] = v
+            if by == 1: BOXES[-1].setdefault('labels', {})[bx] = v
+            if by >= 2: BOXES[-1].setdefault('elements', {})[(by,bx)] = v
+        #create name, labels, get row and col size
+        LG = onlinetex.LabelGenerator()
+        for b in BOXES:
+            for j in range(2,b['size'][0]+1): 
+                fly = { b['labels'][i] : b['elements'].get((j,i), '')
+                                for i in range(1, b['size'][1]+1) }
+                LG.add_label( fly['Label'],
+                              fly['Modifier1']+fly['Modifier2']+fly['Modifier3'],
+                              fly['Short Identifier'], fly['Genotype'] )
+            b['url'] = LG.pdflink()
+            LG.clear()
+        return render.boxes(BOXES, *ud.get_names())
 
-WebPyOAuth2 = decorator.callback_handler()
+
+"""
+    The oauth2callback is done with the google-webapp stuff thats
+    hidden in the oauth2client api.
+    !> manually set the redirect in app.yaml
+"""
+appoauth = decorator.callback_application()
+
 urls = ( "/",           "Index",
          "/drive",      "Drive",
          "/calendar",   "Calendar",
          "/boxes",      "Boxes",
-         decorator.callback_path, "WebPyOAuth2",
        )
-app = web.application(urls, globals())
 
-# GoogleAppEngine name, used in app.yaml
-appgae = app.wsgifunc()
-
-
+appgae = web.application(urls, globals()).wsgifunc()

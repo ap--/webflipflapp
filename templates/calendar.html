@@ -38,7 +38,7 @@ from __future__ import webflipflapp!</h2>
         <th>Choice</th>
     </tr>
 $ clname = ''
-$for name, cid in cl.iteritems():
+$for cid, name in cl.iteritems():
     $ checked = ''
     $if selected is not None:
         $if selected == cid:
