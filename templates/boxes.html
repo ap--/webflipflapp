@@ -56,6 +56,19 @@ $for box in boxes:
         </tr>
     </table>
     </div>
+    <div id='boxcalender'>
+    $if box['info']['mode'] == 'BOXADD':
+        <span>new box?</span>
+        <span><a href=''>add_to_calendar</a></span>
+    $elif box['info']['mode'] == 'BOXOVERRIDE':
+        <span>WARNING box has an id! did you switch the calendar, or is this a box from someone else?</span>
+        <span><a href=''>override id and add_to_calendar</a></span>
+    $else:
+        <span>box:</span>
+        <span>lastModified:</span>
+        <span>scheduled next:</span>
+        <span><a href=''>flipped</a></span>
+    </div>
     <div id='boxspacer'></div>
 </div>
 

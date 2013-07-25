@@ -17,7 +17,7 @@ from google.appengine.ext import db
 from google.appengine.api import users
 
 import onlinetex
-
+import pprint
 
 #--------------------------------------------------
 # Defining the database stuff for userdata storage
@@ -89,7 +89,7 @@ def printerrors(prefix):
         def mydecorator(*args,**kwargs):
             try:
                 return f(*args, **kwargs)
-            except Exception() as e:
+            except Exception as e:
                 return prefix + (' %s' % e)
         return mydecorator
     return thedecorator
@@ -140,8 +140,29 @@ class Calendar(FakeWebapp2RequestHandler):
         selected = web.input(sheet=None).sheet
         if selected is not None:
             ud.set_calendar(selected, cl[selected])
-            
         return render.calendar(cl, ud.calendar_id, *ud.get_names())
+
+
+class CalendarW(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1137.8: She\'s giving all she\'s got')
+    @decorator.oauth_required
+    def GET(self):
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        http = decorator.http()
+        cl = GoogleCalendar.listcalendars(http=http, key='id')       
+        selected = web.input(sheet=None).sheet
+        if selected is not None:
+            ud.set_calendar(selected, cl[selected])
+        
+        EVENTS = {}
+        GoogleCalendar.calendarId = ud.calendar_id
+        for ev in GoogleCalendar.iterevents(http=http,
+                fields="items(start,recurrence,location,summary,description)"):
+            _id = ev.pop('id')
+            EVENTS[_id] = ev
+        web.header('Content-Type', 'text/plain') 
+        return pprint.pformat(EVENTS)
 
 
 class Boxes(FakeWebapp2RequestHandler):
@@ -168,12 +189,35 @@ class Boxes(FakeWebapp2RequestHandler):
                 y_old = y
             else:
                 y_off = y_old = y
-                BOXES.append({'size':[0,0]})
+                BOXES.append({'size':[0,0],'id':''})
             by, bx = y-y_off, x
             BOXES[-1]['size'][:] = map(max,zip([by,bx],BOXES[-1]['size']))
             if by == 0 and bx == 1: BOXES[-1]['name'] = v
+            if by == 0 and bx == 2: BOXES[-1]['lastModified'] = v
+            if by == 0 and bx == 3: BOXES[-1]['id'] = v
             if by == 1: BOXES[-1].setdefault('labels', {})[bx] = v
             if by >= 2: BOXES[-1].setdefault('elements', {})[(by,bx)] = v
+        
+        # calendaring:
+        EVENTS = {}
+        GoogleCalendar.calendarId = ud.calendar_id
+        for ev in GoogleCalendar.iterevents(http=decorator.http(),
+                fields="items(id,start,recurrence,location,summary,description)"):
+            _id = ev.pop('id')
+            EVENTS[_id] = ev
+        
+        boxinfo = {}
+        for box in BOXES:
+            if box['id'] == '' or box['id'] not in EVENTS.keys():
+                boxinfo['mode'] = 'BOXADD'
+            elif box['id']:
+                boxinfo['mode'] = 'BOXOVERRIDE'
+            else:
+                boxinfo['mode'] = 'BOXSHOW'
+            boxinfo['lastModified'] = box.get('lastModified', '')
+            box['info'] = boxinfo      
+
+
         #create name, labels, get row and col size
         LG = onlinetex.LabelGenerator()
         for b in BOXES:
@@ -198,6 +242,7 @@ appoauth = decorator.callback_application()
 urls = ( "/",           "Index",
          "/drive",      "Drive",
          "/calendar",   "Calendar",
+         "/calendarw",   "CalendarW",
          "/boxes",      "Boxes",
        )
 
