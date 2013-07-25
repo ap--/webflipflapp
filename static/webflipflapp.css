@@ -105,6 +105,25 @@ background-color: #333333;
 color: #F2F2F2;
 text-align: left;
 }
+.pdflink {
+padding-left: 15px;
+}
+.pdflink:link {
+color: #F2F2F2;
+text-decoration: none;
+}
+.pdflink:visited {
+color: #F2F2F2;
+text-decoration: none;
+}
+.pdflink:hover {
+color: #FFFFFF;
+text-decoration: underline;
+}
+.pdflink:active {
+color: #FFFFFF;
+text-decoration: underline;
+}
 .boxtableeven {
 background-color: #F2F2F2;
 }

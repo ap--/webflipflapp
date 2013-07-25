@@ -35,17 +35,18 @@ from __future__ import webflipflapp!</h2>
 $for box in boxes:
     $ bh = box['size'][0]
     $ bw = box['size'][1]
+    $ pdfhref = box['url']
     $ name = box['name']
     <div class='boxdiv'>
     <table class='boxtable'>
     <tr class='boxtableheader'>
-    <th colspan="$(bw)">$(name)</th>
+    <th colspan="$(bw)">$(name) <a href="$(pdfhref)" class='pdflink' target="_blank">pdf-labels</a></th>
     </tr>
     <tr class='boxtableheader'>
     $for i in range(1,bw+1):
         <th>$(box['labels'].get(i, ''))</th>
     </tr>
-    $for j in range(1,bh+1):
+    $for j in range(2,bh+1):
         $if j%2 == 0:
             <tr class='boxtableeven'>
         $else:

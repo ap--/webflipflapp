@@ -31,7 +31,9 @@ def get_userdata(user):
         userdata_k = db.Key.from_path('UserData', user.user_id())
         userdata = db.get(userdata_k)
         return userdata
-              
+
+import onlinetex
+
 #user = users.get_current_user()
 #if user:
 #    q = db.GqlQuery("SELECT * FROM UserPrefs WHERE userid = :1", user.user_id())
@@ -150,7 +152,16 @@ class Boxes:
         try:
             user = users.get_current_user()
             ud = get_userdata(user)
-            ss_id = '0AvA5wEfgv_7FdHQxWjYzblJyUW9QR0dCTDVMN2NxTFE'
+            if ud is None:
+                ud = UserData(key_name=user.user_id(),
+                                  spreadsheet_id='',
+                                  spreadsheet_name='no spreadsheet',
+                                  calendar_id='',
+                                  calendar_name='no calendar')
+                ud.put()
+            if not ud.spreadsheet_id:
+                web.seeother('/drive')
+            ss_id = ud.spreadsheet_id
             client = SpreadsheetsClient()
             wfeed = client.get_worksheets(ss_id)
             warn_multiple_worksheets = False if len(wfeed.entry) < 2 else True
@@ -194,6 +205,18 @@ class Boxes:
                         d['elements'][(y,x)] = v
                 d['size'] = (ym,xm) #XXX tricky, but makes sense :)
                 DBOXES.append(d)
+            LG = onlinetex.LabelGenerator()
+            for b in DBOXES:
+                for j in range(2,b['size'][0]+1): 
+                    fly = { b['labels'][i] : b['elements'].get((j,i), '')
+                                    for i in range(1, b['size'][1]+1) }
+                    args = [ fly['Label'],
+                             fly['Modifier1']+fly['Modifier2']+fly['Modifier3'],
+                             fly['Short Identifier'],
+                             fly['Genotype'] ]
+                    LG.add_label(*args)
+                b['url'] = LG.pdflink()
+                LG.clear()
             return render.boxes(DBOXES, *getmenu2(ud))
         except Exception as e:
             return 'We had a %s' % e
