@@ -33,41 +33,44 @@ from __future__ import webflipflapp!</h2>
 <p class='mainheading'>Your Boxes</p>
 
 $for box in boxes:
-    $ bh = box['size'][0]
-    $ bw = box['size'][1]
-    $ pdfhref = box['url']
     $ name = box['name']
+    $ boxid = box['ssid']
+    $ labels = box['labels']
+    $ Nlabels = max(labels.keys())
+    $ flies = box['flies']
+    $ lastModified = box.get('lastModified', 'flipped: N/A')
     <div class='boxdiv'>
     <table class='boxtable'>
     <tr class='boxtableheader'>
-    <th colspan="$(bw)">$(name) <a href="$(pdfhref)" class='pdflink' target="_blank">pdf-labels</a></th>
+        <th colspan="$(Nlabels)">$(name) <a href="/boxes?ssid=$(boxid)&boxname=$(name)&pdf=True" class='pdflink' target='_blank'>pdf-labels</a></th>
     </tr>
     <tr class='boxtableheader'>
-    $for i in range(1,bw+1):
+    $for i in range(1,Nlabels+1):
         <th>$(box['labels'].get(i, ''))</th>
     </tr>
-    $for j in range(2,bh+1):
-        $if j%2 == 0:
+    $for fly in flies:
+        $if loop.even:
             <tr class='boxtableeven'>
         $else:
             <tr class='boxtableodd'>
-        $for i in range(1,bw+1):
-            <td style='text-align:center'>$(box['elements'].get((j,i),''))</td>
+        $for i in range(1,Nlabels+1):
+            <td style='text-align:center'>$fly.get(labels.get(i,''),'')</td>
         </tr>
     </table>
     </div>
     <div id='boxcalender'>
-    $if box['info']['mode'] == 'BOXADD':
+    $if box['mode'] == 'BOXADD':
         <span>new box?</span>
         <span><a href=''>add_to_calendar</a></span>
-    $elif box['info']['mode'] == 'BOXOVERRIDE':
+        <span>$(lastModified)</span>
+    $elif box['mode'] == 'BOXOVERRIDE':
         <span>WARNING box has an id! did you switch the calendar, or is this a box from someone else?</span>
         <span><a href=''>override id and add_to_calendar</a></span>
     $else:
         <span>box:</span>
         <span>lastModified:</span>
         <span>scheduled next:</span>
-        <span><a href=''>flipped</a></span>
+    <span><a href='/boxes?flipped=True&ssid=$(boxid)&boxname=$(name)'>flipped</a></span>
     </div>
     <div id='boxspacer'></div>
 </div>
