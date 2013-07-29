@@ -1,38 +1,60 @@
 
+import re
 import requests
 import datetime
-from onlinetex import LabelGenerator
 from gdata.spreadsheets.data import CellEntry, Cell
 
 
-def get_cellstore_from_spreadsheet(client, ssid):
-    wfeed = client.get_worksheets(ssid)
-    ws = wfeed.entry[0]
-    ID = ssid, ws.get_worksheet_id()
-    # get cells
-    store = [(int(cell.cell.row), int(cell.cell.col), cell.content.text)
-            for cell in client.get_cells(*ID).entry if int(cell.cell.row) >= 3]
-    return store
+class FlyBoxError(Exception):
+    pass
 
 
+class Box(dict):
 
-def get_boxes_from_spreadsheet(client, ssid):
-    store = get_cellstore_from_spreadsheet(client, ssid)
+    def __init__(self, spreadsheet_cellfeed):
+        self._cellfeed = spreadsheet_cellfeed
+
+        if not self._cellfeed:
+            raise FlyBoxError('%s: cellfeed empty' % self.__class__.__name__)
+        else:
+            url = self._cellfeed[0].get_id()
+            result = re.search('cells/(?P<ssid>[^/]*)/(?P<wsid>[^/]*)/', url)
+            self._ssid = result.group('ssid')
+            self._wsid = result.group('wsid')
+
+        default = { 'ssid'          : self._ssid,
+                    'wsid'          : self._wsid,
+                    'calid'         : '',
+                    'modified'      : 'flipped: N/A',
+                    'name'          : '',
+                    'labels'        : {}, # dict of {col : value}
+                    'elements'      : {}, # dict of {(row,col) : value}
+                    'flies'         : [],
+                    'size'          : [0,0],
+                    'mode'          : '' }
+
+        super(Box, self).__init__(default)
+
+
+def get_boxes_from_cellfeed(cellfeed):
     #seperate boxes
     BOXES = []
     y_old = y_off = -2
     ym, xm = 0, 0
+    store = [(int(c.cell.row),int(c.cell.col),c.content.text) for c in cellfeed]
     for y,x,v in store:
+        if y < 3:
+            continue
         if y - y_old < 2:
             y_old = y
         else:
             y_off = y_old = y
-            BOXES.append({'size':[0,0],'id':'','ssid':ssid})
+            BOXES.append(Box(cellfeed))
         by, bx = y-y_off, x
         BOXES[-1]['size'][:] = map(max,zip([by,bx],BOXES[-1]['size']))
         if by == 0 and bx == 1: BOXES[-1]['name'] = v
-        if by == 0 and bx == 2: BOXES[-1]['lastModified'] = v
-        if by == 0 and bx == 3: BOXES[-1]['id'] = v
+        if by == 0 and bx == 2: BOXES[-1]['modified'] = v
+        if by == 0 and bx == 3: BOXES[-1]['calid'] = v
         if by == 1: BOXES[-1].setdefault('labels', {})[bx] = v
         if by >= 2: BOXES[-1].setdefault('elements', {})[(by,bx)] = v
     # get flies, and pdf
@@ -48,6 +70,7 @@ def get_boxes_from_spreadsheet(client, ssid):
     
     return BOXES
 
+   
 def choose_pdf_from_boxes(ssid, name, boxes):
     for b in boxes:
         if b['name'] == name and b['ssid'] == ssid:
@@ -62,77 +85,76 @@ def choose_pdf_from_boxes(ssid, name, boxes):
             return True, "Error: when generating the pdf"
     return True, "Error: box not found"
 
+
 def compare_boxes_and_events(boxes, events):
+    evIds = [ev['id'] for ev in events]
     for box in boxes:
-        if box['id'] == '' or box['id'] not in events.keys():
+        if box['calid'] == '' or box['id'] not in evIds:
             box['mode'] = 'BOXADD'
-        elif box['id']:
+        elif box['calid']:
             box['mode'] = 'BOXOVERRIDE'
         else:
             box['mode'] = 'BOXSHOW'
 
-def set_lastModified_on_Box(client, ssid, boxname):
+
+def set_modified_on_Box(cellfeed, ssid, boxname):
     date = datetime.datetime.strftime(datetime.datetime.now(), 
             'flipped: %Y-%m-%d')
-    wfeed = client.get_worksheets(ssid)
-    ws = wfeed.entry[0]
-    ID = ssid, ws.get_worksheet_id()
+    url = cellfeed[0].get_id()
+    result = re.search('cells/(?P<ssid>[^/]*)/(?P<wsid>[^/]*)/', url)
+    ssid = result.group('ssid')
+    wsid = result.group('wsid')
+    store = [(int(c.cell.row),int(c.cell.col),c.content.text) for c in cellfeed]
     # get cells
     y, x = -1, 2
-    for cell in client.get_cells(*ID).entry:
-        if int(cell.cell.row) < 3:
-            continue
-        if cell.content.text == boxname:
-            y = int(cell.cell.row)
-    if y > -1: 
-        new_cell = CellEntry(cell=Cell(row=str(y),
-                                       col=str(x),
-                                       input_value=date))
-        CELL_URL = ('https://spreadsheets.google.com/feeds/'
-                    'cells/%s/%s/private/full/R%dC%d')%(ID[0],ID[1],y,x)
-        client.update(new_cell, auth_token=client.auth_token,
-                      uri=CELL_URL, force=True)
-    raise Exception('Error: box not found?')
+    for row,col,content in store:
+        if row > 2 and content == boxname:
+            y = row
+            break
+    if y > -1:
+        return y, x, date, wsid, ssid
+    else:
+        raise FlyBoxError('set_modified_on_Box: Box not found?')
 
 
 class LabelGenerator(object):
 
-    TEMPLATE_START = ["\\documentclass[a4paper,10pt]{article}",
-                      "\\usepackage{lmodern}",
-                      "\\usepackage[T1]{fontenc}",
-                      "\\usepackage{array}",
-                      "\\usepackage{seqsplit}",
-                      "\\renewcommand{\\tabcolsep}{1mm}",
-                      "\\linespread{0.4}",
-                      "\\usepackage[newdimens]{labels}",
-                      "\\LabelCols=4",
-                      "\\LabelRows=16",
-                      "\\LeftPageMargin=8mm",
-                      "\\RightPageMargin=8mm",
-                      "\\TopPageMargin=15mm",
-                      "\\BottomPageMargin=12mm",
-                      "\\InterLabelColumn=0.0mm",
-                      "\\InterLabelRow=0.0mm",
-                      "\\LeftLabelBorder=2mm",
-                      "\\RightLabelBorder=1mm",
-                      "\\TopLabelBorder=0.0mm",
-                      "\\BottomLabelBorder=0.0mm",
-                      "\\newcommand{\\prettylabel}[5]{%",
-                      "\\genericlabel{%",
-                      "\\begin{tabular}{|l r| @{}m{0mm}@{}}",
-                      "\\hline",
-                      "~ & ~ & ~ \\\\[-1.5mm] % ",
-                      "\\multicolumn{3}{|l|}{\\textsf{\\footnotesize{#3}}} \\\\[0.5mm] ",
-                      "\\multicolumn{2}{m{42.7mm}}{\\texttt{\\tiny{\\seqsplit{#4}}}} & \\rule{0pt}{5mm} \\\\",
-                      "\\texttt{\\textbf{\\tiny{#5}}} & %",
-                      "\\sffamily{\\textbf{\\large{#1}}\\textit{#2}} & ~ \\\\",
-                      "\\hline",
-                      "\\end{tabular}",
-                      "}",
-                      "}",
-                      "",
-                      "\\begin{document}\n",
-                     ]
+    TEMPLATE_START = [
+    "\\documentclass[a4paper,10pt]{article}",
+    "\\usepackage{lmodern}",
+    "\\usepackage[T1]{fontenc}",
+    "\\usepackage{array}",
+    "\\usepackage{seqsplit}",
+    "\\renewcommand{\\tabcolsep}{1mm}",
+    "\\linespread{0.4}",
+    "\\usepackage[newdimens]{labels}",
+    "\\LabelCols=4",
+    "\\LabelRows=16",
+    "\\LeftPageMargin=8mm",
+    "\\RightPageMargin=8mm",
+    "\\TopPageMargin=15mm",
+    "\\BottomPageMargin=12mm",
+    "\\InterLabelColumn=0.0mm",
+    "\\InterLabelRow=0.0mm",
+    "\\LeftLabelBorder=2mm",
+    "\\RightLabelBorder=1mm",
+    "\\TopLabelBorder=0.0mm",
+    "\\BottomLabelBorder=0.0mm",
+    "\\newcommand{\\prettylabel}[5]{%",
+    "\\genericlabel{%",
+    "\\begin{tabular}{|l r| @{}m{0mm}@{}}",
+    "\\hline",
+    "~ & ~ & ~ \\\\[-1.5mm] % ",
+    "\\multicolumn{3}{|l|}{\\textsf{\\footnotesize{#3}}} \\\\[0.5mm] ",
+    "\\multicolumn{2}{m{42.7mm}}{\\texttt{\\tiny{\\seqsplit{#4}}}} & \\rule{0pt}{5mm} \\\\",
+    "\\texttt{\\textbf{\\tiny{#5}}} & %",
+    "\\sffamily{\\textbf{\\large{#1}}\\textit{#2}} & ~ \\\\",
+    "\\hline",
+    "\\end{tabular}",
+    "}",
+    "}",
+    "",
+    "\\begin{document}\n" ]
     TEMPLATE_LABEL = "\\prettylabel{%s}{%s}{%s}{%s}{%s}"
     TEMPLATE_STOP = ["\n\\end{document}"]
     

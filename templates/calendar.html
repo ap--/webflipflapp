@@ -38,21 +38,21 @@ from __future__ import webflipflapp!</h2>
         <th>Choice</th>
     </tr>
 $ clname = ''
-$for cid, name in cl.iteritems():
+$for ccc in sorted(cl, key=(lambda x: x['summary'])):
     $ checked = ''
     $if selected is not None:
-        $if selected == cid:
+        $if selected == ccc['id']:
             $ checked = ' checked'
-            $ clname = name
+            $ clname = ccc['summary']
     $if loop.even:
         <tr class='drivetableeven'>
     $else:
         <tr class='drivetableodd'>
     <td style='text-align:left'>        
-    <div>$name</div>
+    <div>$(ccc['summary'])</div>
     </td>
     <td style='text-align:center'>
-    <input type="radio" name="sheet" value="$cid"$(checked)></td>
+    <input type="radio" name="sheet" value="$(ccc['id'])"$(checked)></td>
     </tr>
 </table>
 <div class='info' style='text-align:right'><input type='submit' value='Choose'></div>

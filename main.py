@@ -1,29 +1,42 @@
 #!/usr/bin/env python
 
+### PATH
+import sys
 import os
-from apiclient.discovery import build
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib_third_party'))
 
+
+### WebServer
 import web
 from oauth2client.appengine import OAuth2DecoratorFromClientSecrets
 from oauth2client_webpy_bridge import FakeWebapp2RequestHandler
+import json; template_globals = {"json_encode": json.dumps}
 
+
+### Google API interfaces
+from apiclient.discovery import build
 import apgooglelayer.drive
 import apgooglelayer.calendar
+import apgooglelayer.spreadsheets
 
-import gdata.spreadsheets.client
-from oauth2client_gdata_bridge import OAuth2BearerToken
 
+### Google Appengine imports
 from google.appengine.ext import db
 from google.appengine.api import users
 
+
+### Flyflippingdstuff
 import flyboxes
 import onlinetex
+
+
+### Debugging
 import pprint
+def webDEBUG(ob):
+    web.header('Content-Type', 'text/plain')
+    return pprint.pformat(ob)
 
-import json
-template_globals = {"json_encode": json.dumps}
-
-import requests
 
 #--------------------------------------------------
 # Defining the database stuff for userdata storage
@@ -76,16 +89,9 @@ decorator = OAuth2DecoratorFromClientSecrets(
                        'https://www.googleapis.com/auth/calendar',
                        'https://spreadsheets.google.com/feeds'])
 
-drive_service = build('drive', 'v2')
-calendar_service = build('calendar', 'v3')
-
-GoogleDrive = apgooglelayer.drive.GoogleDrive(drive_service)
-GoogleCalendar = apgooglelayer.calendar.GoogleCalendar(calendar_service)
-
-def SpreadsheetsClient():
-    # this returns a authenticated spreadsheet client
-    token = OAuth2BearerToken(decorator.credentials)
-    return gdata.spreadsheets.client.SpreadsheetsClient(auth_token=token)
+GoogleDrive = apgooglelayer.drive.GoogleDrive()
+GoogleCalendar = apgooglelayer.calendar.GoogleCalendar()
+GoogleSpreadsheets = apgooglelayer.spreadsheets.GoogleSpreadsheets()
 
 
 
@@ -125,14 +131,12 @@ class Drive(FakeWebapp2RequestHandler):
         user = users.get_current_user()
         ud = get_userdata(user)
         http = decorator.http()
-        tree = GoogleDrive.folder_structure(http=http)
-        ident = GoogleDrive.files_as_id_dict(
-                fields='items(id,title,iconLink,mimeType)', http=http)
-        selected = web.input(sheet=None).sheet
+        tree = GoogleDrive.folder_structure(http=http, fields='items(iconLink)')
+        selected = web.input(selected=None).selected
         if selected is not None:
-            ud.set_spreadsheet(selected, ident[selected]['title'])
-
-        return render.drive(tree, ident, ud.spreadsheet_id, *ud.get_names())
+            name = tree.get_first_where(lambda k: k['id']==selected)['title']
+            ud.set_spreadsheet(selected, name)
+        return render.drive(tree, ud.spreadsheet_id, *ud.get_names())
 
 
 class Calendar(FakeWebapp2RequestHandler):
@@ -142,59 +146,42 @@ class Calendar(FakeWebapp2RequestHandler):
         user = users.get_current_user()
         ud = get_userdata(user)
         http = decorator.http()
-        cl = GoogleCalendar.listcalendars(http=http, key='id')       
-        selected = web.input(sheet=None).sheet
+        cldr = GoogleCalendar.list_calendars(http=http, fields='items(id,summary)')
+        selected = web.input(selected=None).selected
         if selected is not None:
-            ud.set_calendar(selected, cl[selected])
-        return render.calendar(cl, ud.calendar_id, *ud.get_names())
-
-
-class CalendarW(FakeWebapp2RequestHandler):
-    @printerrors('Stardate 1137.8: She\'s giving all she\'s got')
-    @decorator.oauth_required
-    def GET(self):
-        user = users.get_current_user()
-        ud = get_userdata(user)
-        http = decorator.http()
-        cl = GoogleCalendar.listcalendars(http=http, key='id')       
-        selected = web.input(sheet=None).sheet
-        if selected is not None:
-            ud.set_calendar(selected, cl[selected])
-        
-        EVENTS = {}
-        GoogleCalendar.calendarId = ud.calendar_id
-        for ev in GoogleCalendar.iterevents(http=http,
-                fields="items(start,recurrence,location,summary,description)"):
-            _id = ev.pop('id')
-            EVENTS[_id] = ev
-        web.header('Content-Type', 'text/plain') 
-        return pprint.pformat(EVENTS)
+            name = next(c['summary'] for c in cldr if c['id']==selected)
+            ud.set_calendar(selected, name)
+        return render.calendar(cldr, ud.calendar_id, *ud.get_names())
 
 
 class Boxes(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1407.1: You green blooded bastard')
     @decorator.oauth_required
     def GET(self):
-        _i = web.input(pdf=None, flipped=None)
         user = users.get_current_user()
         ud = get_userdata(user)
-        if not ud.spreadsheet_id:
-            web.seeother('/drive')
+        http = decorator.http()
+        data = web.input(pdf=None, flipped=None)
+        
         # get Boxes and Events
-        client = SpreadsheetsClient()
-        if bool(_i.flipped):
-            flyboxes.set_lastModified_on_Box(client, _i.ssid, _i.boxname)
-        BOXES = flyboxes.get_boxes_from_spreadsheet(client, ud.spreadsheet_id)
+        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(
+                                            ud.spreadsheet_id, http=http)
+        if bool(data.flipped):
+            args = flyboxes.set_modified_on_Box(cellfeed,
+                                            data.ssid, data.boxname)
+            GoogleSpreadsheets.set_cell(*args, http=http)
+            web.seeother('/boxes')
+        BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
+
         # IF PDF is requested we can stop here
-        if bool(_i.pdf):
-            error, data = flyboxes.choose_pdf_from_boxes(_i.ssid,_i.boxname,BOXES)
+        if bool(data.pdf):
+            error, data = flyboxes.choose_pdf_from_boxes(data.ssid,
+                                                data.boxname, BOXES)
             web.header('Content-Type','text/plain' if error else 'application/pdf')
             return data
-
-
         # ELSE: 
-        EVENTS = GoogleCalendar.get_events_from_calendar(ud.calendar_id, 
-                                                         http=decorator.http())
+        EVENTS = GoogleCalendar.iter_events(calendarId=ud.calendar_id, http=http)
+        #return webDEBUG(EVENTS) 
         flyboxes.compare_boxes_and_events(BOXES, EVENTS)
             
         return render.boxes(BOXES, *ud.get_names())
@@ -210,7 +197,6 @@ appoauth = decorator.callback_application()
 urls = ( "/",           "Index",
          "/drive",      "Drive",
          "/calendar",   "Calendar",
-         "/calendarw",   "CalendarW",
          "/boxes",      "Boxes",
        )
 

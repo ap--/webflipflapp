@@ -2,4 +2,4 @@
 .PHONY:	templates
 
 templates:
-	python web/template.py --compile ./templates
+	python lib_third_party/web/template.py --compile ./templates

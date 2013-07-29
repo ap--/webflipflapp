@@ -38,7 +38,7 @@ $for box in boxes:
     $ labels = box['labels']
     $ Nlabels = max(labels.keys())
     $ flies = box['flies']
-    $ lastModified = box.get('lastModified', 'flipped: N/A')
+    $ modified = box.get('modified', 'flipped: N/A')
     <div class='boxdiv'>
     <table class='boxtable'>
     <tr class='boxtableheader'>
@@ -62,7 +62,7 @@ $for box in boxes:
     $if box['mode'] == 'BOXADD':
         <span>new box?</span>
         <span><a href=''>add_to_calendar</a></span>
-        <span>$(lastModified)</span>
+        <span>$(modified)</span>
     $elif box['mode'] == 'BOXOVERRIDE':
         <span>WARNING box has an id! did you switch the calendar, or is this a box from someone else?</span>
         <span><a href=''>override id and add_to_calendar</a></span>

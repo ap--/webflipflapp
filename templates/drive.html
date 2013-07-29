@@ -1,4 +1,4 @@
-$def with (tree, ident, selected, ss, cl)
+$def with (tree, selected, ss, cl)
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
@@ -38,14 +38,14 @@ from __future__ import webflipflapp!</h2>
         <th>Choice</th>
     </tr>
 $ clname = ''
-$for level, value in tree.walkthrough():
+$for level, value in tree.walkthrough(key=lambda x: ('folder' not in x['mimeType'], x['title'])):
     $ checked = ''
     $if selected is not None:
-        $if selected == value.file_id:
+        $if selected == value['id']:
             $ checked = ' checked'
-            $ clname = ident[value.file_id]['title']
-    $ name = ident[value.file_id]['title']
-    $ icon = ident[value.file_id]['iconLink']
+            $ clname = value['title']
+    $ name = value['title']
+    $ icon = value['iconLink']
     $ ind = 20*level+6
     $if loop.even:
         <tr class='drivetableeven'>
@@ -55,7 +55,7 @@ $for level, value in tree.walkthrough():
     <div style='text-indent:$(ind)px'><img src="$(icon)"/>$name</div>
     </td>
     <td style='text-align:center'>
-    <input type="radio" name="sheet" value="$value.file_id"$(checked)></td>
+    <input type="radio" name="selected" value="$(value['id'])"$(checked)></td>
     </tr>
 </table>
 <div class='info' style='text-align:right'><input type='submit' value='Choose'></div>
