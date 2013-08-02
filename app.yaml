@@ -1,5 +1,5 @@
 application: webflipflapp
-version: 1
+version: 1-0-3
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -7,13 +7,17 @@ threadsafe: true
 handlers:
 - url: /static/
   static_dir: static
-
-- url: /blah
-  script: blah.application
+  secure: always
 
 - url: /oauth2callback
   script: main.appoauth
+  secure: always
 
 - url: /.*
   script: main.appgae
+  secure: always
+
+libraries:
+- name: webob
+  version: "1.2.3"
 

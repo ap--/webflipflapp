@@ -35,7 +35,7 @@ margin-left: 0px;
 }
 
 .docbody {
-width: 550px;
+width: 900px;
 margin-left: 30px;
 }
 
@@ -64,6 +64,33 @@ a:active {
 color: #576975;
 text-decoration: underline;
 }
+.invaliddiv{
+}
+.invalidheader {
+color: #440000;
+font-size: 1.3em;
+}
+.invalidtable {
+width: 550px;
+border-width: 0px;
+border-style: solid;
+border-color: #000;
+}
+.invalidtableeven {
+background-color: #FFE3E3;
+}
+.invalidtableodd {
+background-color: #FFD3D3;
+}
+.invalidtableheader {
+background-color: #DD0000;
+color: #333333;
+text-align: left;
+margin-left: 0px;
+margin-top: 0px;
+margin-right: 0px;
+margin-bottom: 0px;
+}
 
 .drivetable {
 width: 550px;
@@ -71,7 +98,6 @@ border-width: 0px;
 border-style: solid;
 border-color: #000;
 }
-
 .drivetableeven {
 background-color: #F2F2F2;
 }
@@ -87,9 +113,17 @@ margin-top: 0px;
 margin-right: 0px;
 margin-bottom: 0px;
 }
+
 .boxdiv {
 width: 900px;
 bottom-padding: 20px;
+}
+.boxdivover {
+width: 900px;
+bottom-padding: 20px;
+border-width: 2px;
+border-style: solid;
+border-color: #F00;
 }
 .boxheading {
 font-size: 1.3em;   

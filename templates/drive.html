@@ -1,4 +1,8 @@
-$def with (tree, selected, ss, cl)
+$def with (tree, ud, invalid)
+$ SPREADSHEETS = ud.spreadsheet_name.split(',')
+$ CALENDARS = ud.calendar_name.split(',')
+$ SSID = ud.spreadsheet_id.split(',')
+$ CLID = ud.calendar_id.split(',')
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
@@ -8,23 +12,57 @@ $def with (tree, selected, ss, cl)
 </head>
 <body>
 <div class="wholedoc">    
+    
+<!-- THE INVALID ERROR -->
+$if invalid:
+    <div class="invaliddiv">
+    <p class="invalidheader">INVALID SPREADSHEETS. no Webflipflap Flystock spreadsheets.</p>
+    <table class="invalidtable">
+    <tr class='invalidtableheader'>
+        <th>Name</th>
+        <th>ID</th>
+    </tr>
+    $for issid in invalid:
+        $ iname = tree.get_first_where(lambda k: k['id'] == issid)['title']
+        $if loop.even:
+            <tr class='invalidtableeven'>
+        $else:
+            <tr class='invalidtableodd'>
+        <td>$(iname)</td>
+        <td>$(issid)</td>
+        </tr>
+    </table>
+    </div> 
+
+    
+<!-- The website title -->
 <div class="docheader">
 <h1><a href="/">WebFlipFlapp</a></h1>
 <h2>from __past__ import why_do_i_forget_that_every_single_time<br/>
 from __future__ import webflipflapp!</h2>
 </div>
+
+<!-- The navigation menu -->
 <div class="menu">
     <span class="menuheader">menu:</span>
     <span class="menuitem"><a href="/drive">choose spreadsheet</a></span>
     <span class="menuitem"><a href="/calendar">choose calendar</a></span>
     <span class="menuitem"><a href="/boxes">view boxes</a></span>
 </div> 
+
+<!-- The spreadsheet and calendar selection -->
 <div class="menu2">
-    <span class="menuheader2">using:</span>
-    <span class="menuitem2">ss '$ss'</span>
-    <span class="menuheader2">and</span>
-    <span class="menuitem2">cal '$cl'</span>
+<dl>
+<dt class="menuheader2">spreadsheets:</dt>
+$for ss in SPREADSHEETS:
+    <dd>- $(ss)</dd>
+<dt class="menuheader2">calendars:</dt>
+$for cal in CALENDARS:
+    <dd>- $(cal)</dd>
+</dl>
 </div> 
+
+<!-- The main body -->
 <div class="docbody">
 
 <p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
@@ -37,13 +75,9 @@ from __future__ import webflipflapp!</h2>
         <th>Filename</th>
         <th>Choice</th>
     </tr>
-$ clname = ''
 $for level, value in tree.walkthrough(key=lambda x: ('folder' not in x['mimeType'], x['title'])):
-    $ checked = ''
-    $if selected is not None:
-        $if selected == value['id']:
-            $ checked = ' checked'
-            $ clname = value['title']
+    $ checked = 'checked' if value['id'] in SSID else ''
+    $ isSS = value['mimeType'] == 'application/vnd.google-apps.spreadsheet'
     $ name = value['title']
     $ icon = value['iconLink']
     $ ind = 20*level+6
@@ -55,18 +89,12 @@ $for level, value in tree.walkthrough(key=lambda x: ('folder' not in x['mimeType
     <div style='text-indent:$(ind)px'><img src="$(icon)"/>$name</div>
     </td>
     <td style='text-align:center'>
-    <input type="radio" name="selected" value="$(value['id'])"$(checked)></td>
+    $if isSS:
+        <input type="checkbox" name="selected" value="$(value['id'])" $(checked) /></td>
     </tr>
 </table>
 <div class='info' style='text-align:right'><input type='submit' value='Choose'></div>
 </form>
-<p class='mainheading'>Selected Spreadsheet</p>
-<div class='info'>
-$if selected is not None:
-    You selected spreadsheet: '$(clname)' for storing reminders.
-$else:
-    You haven't selected a spreadsheet yet.
-</div>
 
 </div>
 

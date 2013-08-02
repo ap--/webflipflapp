@@ -1,4 +1,8 @@
-$def with (cl, selected, ss, cal)
+$def with (cl, ud)
+$ SPREADSHEETS = ud.spreadsheet_name.split(',')
+$ CALENDARS = ud.calendar_name.split(',')
+$ SSID = ud.spreadsheet_id.split(',')
+$ CLID = ud.calendar_id.split(',')
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
@@ -8,23 +12,35 @@ $def with (cl, selected, ss, cal)
 </head>
 <body>
 <div class="wholedoc">    
+    
+<!-- The website title -->
 <div class="docheader">
 <h1><a href="/">WebFlipFlapp</a></h1>
 <h2>from __past__ import why_do_i_forget_that_every_single_time<br/>
 from __future__ import webflipflapp!</h2>
 </div>
+
+<!-- The navigation menu -->
 <div class="menu">
     <span class="menuheader">menu:</span>
     <span class="menuitem"><a href="/drive">choose spreadsheet</a></span>
     <span class="menuitem"><a href="/calendar">choose calendar</a></span>
     <span class="menuitem"><a href="/boxes">view boxes</a></span>
 </div> 
+
+<!-- The spreadsheet and calendar selection -->
 <div class="menu2">
-    <span class="menuheader2">using:</span>
-    <span class="menuitem2">ss '$ss'</span>
-    <span class="menuheader2">and</span>
-    <span class="menuitem2">cal '$cal'</span>
-</div>
+<dl>
+<dt class="menuheader2">spreadsheets:</dt>
+$for ss in SPREADSHEETS:
+    <dd>- $(ss)</dd>
+<dt class="menuheader2">calendars:</dt>
+$for cal in CALENDARS:
+    <dd>- $(cal)</dd>
+</dl>
+</div> 
+
+<!-- The main body -->
 <div class="docbody">
     
 <p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
@@ -37,13 +53,8 @@ from __future__ import webflipflapp!</h2>
         <th>Calendar</th>
         <th>Choice</th>
     </tr>
-$ clname = ''
 $for ccc in sorted(cl, key=(lambda x: x['summary'])):
-    $ checked = ''
-    $if selected is not None:
-        $if selected == ccc['id']:
-            $ checked = ' checked'
-            $ clname = ccc['summary']
+    $ checked = 'checked' if ccc['id'] in CLID else ''
     $if loop.even:
         <tr class='drivetableeven'>
     $else:
@@ -52,21 +63,15 @@ $for ccc in sorted(cl, key=(lambda x: x['summary'])):
     <div>$(ccc['summary'])</div>
     </td>
     <td style='text-align:center'>
-    <input type="radio" name="sheet" value="$(ccc['id'])"$(checked)></td>
+    <input type="checkbox" name="selected" value="$(ccc['id'])" $(checked) /></td>
     </tr>
 </table>
 <div class='info' style='text-align:right'><input type='submit' value='Choose'></div>
 </form>
-<p class='mainheading'>Selected Calendar</p>
-<div class='info'>
-$if selected is not None:
-    You selected calendar: '$(clname)' for storing reminders.
-$else:
-    You haven't selected a calendar yet.
-</div>
-</div>
+
 <div id='footspacer'></div>
 <img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" />
 </div>
 </body>
 </html>
+

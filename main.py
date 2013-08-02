@@ -28,8 +28,7 @@ from google.appengine.api import users
 
 ### Flyflippingdstuff
 import flyboxes
-import onlinetex
-
+import datetime
 
 ### Debugging
 import pprint
@@ -96,13 +95,19 @@ GoogleSpreadsheets = apgooglelayer.spreadsheets.GoogleSpreadsheets()
 
 
 """~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
+import traceback
 def printerrors(prefix):
     def thedecorator(f):
         def mydecorator(*args,**kwargs):
             try:
                 return f(*args, **kwargs)
             except Exception as e:
-                return prefix + (' %s' % e)
+                sp = '%s\n%s\n' % (prefix, '~'*len(prefix))
+                se = 'ERROR: %s\n' % str(e)
+                st = traceback.format_exc().strip().replace('\n', '\n> ')
+                web.header('Content-Type', 'text/plain')
+                ret = '%s\n%s\n%s' % (sp, se, st)
+                return ret
         return mydecorator
     return thedecorator
 
@@ -121,7 +126,7 @@ class Index(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         has_cred = decorator.has_credentials()
         auth_url = decorator.authorize_url()
-        return render.index(has_cred, auth_url, *ud.get_names())
+        return render.index(has_cred, auth_url, ud)
 
 
 class Drive(FakeWebapp2RequestHandler):
@@ -132,11 +137,22 @@ class Drive(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         http = decorator.http()
         tree = GoogleDrive.folder_structure(http=http, fields='items(iconLink)')
-        selected = web.input(selected=None).selected
-        if selected is not None:
-            name = tree.get_first_where(lambda k: k['id']==selected)['title']
-            ud.set_spreadsheet(selected, name)
-        return render.drive(tree, ud.spreadsheet_id, *ud.get_names())
+        selections = web.input(selected=[]).selected
+        invalid = web.input(invalid=[]).invalid
+        if selections:
+            ids, names, invalid = [], [], []
+            for selected in selections:
+                name = tree.get_first_where(lambda k: k['id']==selected)['title']
+                cells = GoogleSpreadsheets.get_cells_from_first_worksheet(selected, http=http)
+                if cells and cells[0].content.text == 'WFF:FLYSTOCK':
+                    ids.append(selected)
+                    names.append(name)
+                else:
+                    invalid.append(selected)
+            if invalid:
+                raise web.seeother('/drive?'+'&'.join(['invalid=%s' % sid for sid in invalid]))
+            ud.set_spreadsheet(",".join(ids), ",".join(names))
+        return render.drive(tree, ud, invalid)
 
 
 class Calendar(FakeWebapp2RequestHandler):
@@ -147,11 +163,15 @@ class Calendar(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         http = decorator.http()
         cldr = GoogleCalendar.list_calendars(http=http, fields='items(id,summary)')
-        selected = web.input(selected=None).selected
-        if selected is not None:
-            name = next(c['summary'] for c in cldr if c['id']==selected)
-            ud.set_calendar(selected, name)
-        return render.calendar(cldr, ud.calendar_id, *ud.get_names())
+        selections = web.input(selected=[]).selected
+        if selections:
+            ids, names = [], []
+            for selected in selections:
+                name = next(c['summary'] for c in cldr if c['id']==selected)
+                ids.append(selected)
+                names.append(name)
+            ud.set_calendar(",".join(ids), ",".join(names))
+        return render.calendar(cldr, ud)
 
 
 class Boxes(FakeWebapp2RequestHandler):
@@ -161,30 +181,48 @@ class Boxes(FakeWebapp2RequestHandler):
         user = users.get_current_user()
         ud = get_userdata(user)
         http = decorator.http()
-        data = web.input(pdf=None, flipped=None)
-        
-        # get Boxes and Events
-        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(
-                                            ud.spreadsheet_id, http=http)
+        data = web.input(pdf=None, flipped=None, add=None)
+        # IF A BOX GOT FLIPPED
         if bool(data.flipped):
-            args = flyboxes.set_modified_on_Box(cellfeed,
-                                            data.ssid, data.boxname)
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
+            args = flyboxes.set_modified_on_Box(cellfeed, data.ssid, data.boxname)
             GoogleSpreadsheets.set_cell(*args, http=http)
-            web.seeother('/boxes')
-        BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
-
+            raise web.seeother('/boxes')
         # IF PDF is requested we can stop here
         if bool(data.pdf):
-            error, data = flyboxes.choose_pdf_from_boxes(data.ssid,
-                                                data.boxname, BOXES)
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
+            BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
+            error, data = flyboxes.choose_pdf_from_boxes(data.ssid, data.boxname, BOXES)
             web.header('Content-Type','text/plain' if error else 'application/pdf')
             return data
+        # IF BOX is ADDED to CALENDAR
+        if bool(data.add):
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
+            BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
+            box = next(b for b in BOXES if b['name'] == data.boxname)
+            desc = '%s :: %s' % (box['name'], box['ssid'])
+            nev = GoogleCalendar.add_recurring_1day_event(calendarId=data.clid,
+                    summary=box['name'], description=desc, start=data.start,
+                    recurrence_days=data.freq, location=data.location, http=http)
+            args = flyboxes.set_calid_on_Box(cellfeed, data.ssid, data.boxname, data.clid, nev['id'])
+            GoogleSpreadsheets.set_cell(*args, http=http)
+            raise web.seeother('/boxes')
+
         # ELSE: 
-        EVENTS = GoogleCalendar.iter_events(calendarId=ud.calendar_id, http=http)
-        #return webDEBUG(EVENTS) 
-        flyboxes.compare_boxes_and_events(BOXES, EVENTS)
-            
-        return render.boxes(BOXES, *ud.get_names())
+        # GET SELECTED SPREADSHEETS:
+        SSCOLL = {}
+        for ssid in ud.spreadsheet_id.split(','):
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            SSCOLL[ssid] = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        # GET EVENTS
+        CLCOLL = {}
+        for clid in ud.calendar_id.split(','):
+            CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
+
+        for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
+            flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
+
+        return render.boxes(SSCOLL, ud)
 
 
 """

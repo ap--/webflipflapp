@@ -70,7 +70,6 @@ def get_boxes_from_cellfeed(cellfeed):
     
     return BOXES
 
-   
 def choose_pdf_from_boxes(ssid, name, boxes):
     for b in boxes:
         if b['name'] == name and b['ssid'] == ssid:
@@ -86,15 +85,63 @@ def choose_pdf_from_boxes(ssid, name, boxes):
     return True, "Error: box not found"
 
 
-def compare_boxes_and_events(boxes, events):
+def compare_boxes_and_events_coll(sscoll, clcoll):
+    events = []
+    boxes = []
+    for bb in sscoll.values():
+        boxes.extend(bb)
+    for ci, cc in clcoll.iteritems():
+        for e in cc:
+            e['_clid_'] = ci
+            events.append(e)
     evIds = [ev['id'] for ev in events]
+    ret = []
     for box in boxes:
-        if box['calid'] == '' or box['id'] not in evIds:
-            box['mode'] = 'BOXADD'
-        elif box['calid']:
-            box['mode'] = 'BOXOVERRIDE'
+        bbb = box['calid'].split()
+        if len(bbb) > 1:
+            bcl = bbb[-1]
+            bev = bcl.split('/')[-1]
+            bcd = bcl.split('/')[0]
         else:
+            bev = ''
+            bcd = ''
+        if bev in evIds:
             box['mode'] = 'BOXSHOW'
+            # figure out when that happens
+            ev = next( e for e in events if e['id'] == bev )
+            ret.append([box, ev['_clid_'], ev['id']])
+        else:
+            if bcd == "":
+                box['mode'] = 'BOXADD'
+            else:
+                box['mode'] = 'BOXOVERRIDE'
+    return ret
+
+def set_schedule_on_Box(box, clid, evid, GoogleCalendar, http):
+    dayonly = {'hour':0,'minute':0,'second':0,'microsecond':0}
+    flipped = box.get('modified')
+    try:
+        flipped = datetime.datetime.strptime(flipped, 'flipped: %Y-%m-%d')
+    except:
+        flipped = datetime.datetime.strptime('2000-01-01', '%Y-%m-%d')
+    
+    today = datetime.datetime.today().replace(**dayonly)
+    lookahead = today + datetime.timedelta(days=365)
+    
+    tMin = flipped.isoformat('T')+'Z'
+    tMax = lookahead.isoformat('T')+'Z'
+
+    enext = GoogleCalendar.get_instances(calendarId=clid, eventId=evid,
+                fields='items(start)', timeMin=tMin, timeMax=tMax, http=http)
+    if len(enext) == 0:
+        box['scheduled'] = '...'
+    else:
+        scheduled= datetime.datetime.strptime(enext[0]['start']['date'],'%Y-%m-%d')
+        scheduled.replace(**dayonly)
+        if scheduled <= today:
+            box['scheduled'] = 'overdue!'
+        else:
+            box['scheduled'] = 'in %d days' % (scheduled-today).days
 
 
 def set_modified_on_Box(cellfeed, ssid, boxname):
@@ -115,6 +162,25 @@ def set_modified_on_Box(cellfeed, ssid, boxname):
         return y, x, date, wsid, ssid
     else:
         raise FlyBoxError('set_modified_on_Box: Box not found?')
+
+def set_calid_on_Box(cellfeed, ssid, boxname, calid, eventid):
+    value = 'calid: %s/%s' % (calid, eventid)
+    url = cellfeed[0].get_id()
+    result = re.search('cells/(?P<ssid>[^/]*)/(?P<wsid>[^/]*)/', url)
+    ssid = result.group('ssid')
+    wsid = result.group('wsid')
+    store = [(int(c.cell.row),int(c.cell.col),c.content.text) for c in cellfeed]
+    # get cells
+    y, x = -1, 3
+    for row,col,content in store:
+        if row > 2 and content == boxname:
+            y = row
+            break
+    if y > -1:
+        return y, x, value, wsid, ssid
+    else:
+        raise FlyBoxError('set_calid_on_Box: Box not found?')
+
 
 
 class LabelGenerator(object):
@@ -185,7 +251,7 @@ class LabelGenerator(object):
     @classmethod
     def pdflink_from_box(cls, box, out='pdf.out', dpi=600, keys=None):
         if keys is None:
-            keys = ['Label', 'Modifier1---Modifier2---Modifier3',
+            keys = ['Label', 'Modifier1',
                     'Short Identifier','Genotype','---date---']
         if len(keys) != 5:
             raise ValueError("pdflink_from_box requires 5 labelkeys")

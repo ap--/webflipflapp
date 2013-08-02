@@ -1,78 +1,128 @@
-$def with (boxes, ss, cl)
+$def with (sscoll, ud)
+$ SPREADSHEETS = ud.spreadsheet_name.split(',')
+$ CALENDARS = ud.calendar_name.split(',')
+$ SSID = ud.spreadsheet_id.split(',')
+$ CLID = ud.calendar_id.split(',')
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
-<script src="/static/jquery-2.0.3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 <script>
+    $$(function() {
+        $$(".datepicker").datepicker({ dateFormat: "yy-mm-dd" });
+    }); 
 </script>
 </head>
 <body>
-<div class="wholedoc">    
+<div class="wholedoc"> 
+    
+<!-- The website title -->
 <div class="docheader">
 <h1><a href="/">WebFlipFlapp</a></h1>
 <h2>from __past__ import why_do_i_forget_that_every_single_time<br/>
 from __future__ import webflipflapp!</h2>
 </div>
+
+<!-- The navigation menu -->
 <div class="menu">
     <span class="menuheader">menu:</span>
     <span class="menuitem"><a href="/drive">choose spreadsheet</a></span>
     <span class="menuitem"><a href="/calendar">choose calendar</a></span>
     <span class="menuitem"><a href="/boxes">view boxes</a></span>
 </div> 
+
+<!-- The spreadsheet and calendar selection -->
 <div class="menu2">
-    <span class="menuheader2">using:</span>
-    <span class="menuitem2">ss '$ss'</span>
-    <span class="menuheader2">and</span>
-    <span class="menuitem2">cal '$cl'</span>
+<dl>
+<dt class="menuheader2">spreadsheets:</dt>
+$for ss in SPREADSHEETS:
+    <dd>- $(ss)</dd>
+<dt class="menuheader2">calendars:</dt>
+$for cal in CALENDARS:
+    <dd>- $(cal)</dd>
+</dl>
 </div> 
+
+<!-- The main body -->
 <div class="docbody">
 
 <p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
 <div class='info'>If you want to modify some entries in the stock spreadsheet, please do that via the <a href="https://drive.google.com">Google Drive</a> web interface. And do not bug the developer.</div>
 
-<p class='mainheading'>Your Boxes</p>
 
-$for box in boxes:
-    $ name = box['name']
-    $ boxid = box['ssid']
-    $ labels = box['labels']
-    $ Nlabels = max(labels.keys())
-    $ flies = box['flies']
-    $ modified = box.get('modified', 'flipped: N/A')
-    <div class='boxdiv'>
-    <table class='boxtable'>
-    <tr class='boxtableheader'>
-        <th colspan="$(Nlabels)">$(name) <a href="/boxes?ssid=$(boxid)&boxname=$(name)&pdf=True" class='pdflink' target='_blank'>pdf-labels</a></th>
-    </tr>
-    <tr class='boxtableheader'>
-    $for i in range(1,Nlabels+1):
-        <th>$(box['labels'].get(i, ''))</th>
-    </tr>
-    $for fly in flies:
-        $if loop.even:
-            <tr class='boxtableeven'>
+$ num = -1
+$for ssid, ssname in zip(SSID,SPREADSHEETS):
+    <p class='mainheading'>$(ssname)</p>
+    $ boxes = sscoll[ssid]
+    $for box in boxes:
+        $ num += 1
+        $ name = box['name']
+        $ boxid = box['ssid']
+        $ labels = box['labels']
+        $ Nlabels = max(labels.keys())
+        $ flies = box['flies']
+        $ modified = box.get('modified', 'flipped: N/A')
+        $ scheduled = box.get('scheduled', 'N/A')
+        
+        <!-- Calendar config -->
+        <div id='boxcalender'>
+        <span>box: </span>
+        $if box['mode'] == 'BOXADD':
+            <span><a href="javascript:void(0)" onclick="$$('#boxaddcalendar$(num)').show('fast')">add_to_calendar</a></span>
+        $elif box['mode'] == 'BOXOVERRIDE':
+            <span>WARNING: box has an id! Did you select the calendar?</span>
+            <span><a href="javascript:void(0)" onclick="$$('#boxaddcalendar$(num)').show('fast')">override id and add_to_calendar</a></span>
         $else:
-            <tr class='boxtableodd'>
-        $for i in range(1,Nlabels+1):
-            <td style='text-align:center'>$fly.get(labels.get(i,''),'')</td>
+            <span>scheduled next: $(scheduled)</span>
+        <span><a href='/boxes?flipped=True&ssid=$(boxid)&boxname=$(name)'>$(modified)</a></span>
+        </div>
+
+        <!-- BOXADD to Calendar menu -->
+        $if box['mode'] in ['BOXADD', 'BOXOVERRIDE']:
+            <div id='boxaddcalendar$(num)' style='display:none'>
+            <form action="/boxes">
+            <input style='display:none' name="add" value="True" />
+            <span>start: <input type='text' class="datepicker" name="start" size="12" /></span>
+            <span>every: <input name="freq" value="28" size='3'/>days. </span>
+            <span>location: <input type='text' name="location" size="20"/></span>
+            <span>calendar: <select name='clid'>
+            $for cc, cn in zip(CLID,CALENDARS):
+                <option value="$(cc)">$(cn)</option>
+            </select></span>
+            <input style='display:none' name="ssid" value="$(boxid)" />
+            <input style='display:none' name="boxname" value="$(name)" />
+            <input type="submit" value="add to calendar">
+            </form>
+            </div>
+
+        <!-- THE BOX -->
+        $if box['mode'] == 'BOXSHOW' and scheduled == 'overdue!':
+            <div class='boxdivover'>
+        $else:
+            <div class='boxdiv'>
+        <table class='boxtable'>
+        <tr class='boxtableheader'>
+            <th colspan="$(Nlabels)">$(name) <a href="/boxes?ssid=$(boxid)&boxname=$(name)&pdf=True" class='pdflink' target='_blank'>pdf-labels</a></th>
         </tr>
-    </table>
-    </div>
-    <div id='boxcalender'>
-    $if box['mode'] == 'BOXADD':
-        <span>new box?</span>
-        <span><a href=''>add_to_calendar</a></span>
-        <span>$(modified)</span>
-    $elif box['mode'] == 'BOXOVERRIDE':
-        <span>WARNING box has an id! did you switch the calendar, or is this a box from someone else?</span>
-        <span><a href=''>override id and add_to_calendar</a></span>
-    $else:
-        <span>box:</span>
-        <span>lastModified:</span>
-        <span>scheduled next:</span>
-    <span><a href='/boxes?flipped=True&ssid=$(boxid)&boxname=$(name)'>flipped</a></span>
-    </div>
-    <div id='boxspacer'></div>
+        <tr class='boxtableheader'>
+        $for i in range(1,Nlabels+1):
+            <th>$(box['labels'].get(i, ''))</th>
+        </tr>
+        $for fly in flies:
+            $if loop.even:
+                <tr class='boxtableeven'>
+            $else:
+                <tr class='boxtableodd'>
+            $for i in range(1,Nlabels+1):
+                <td style='text-align:center'>$fly.get(labels.get(i,''),'')</td>
+            </tr>
+        </table>
+        </div>
+        <div id='boxspacer'></div>
+    
+    
 </div>
 
 <div id='footspacer'></div>
