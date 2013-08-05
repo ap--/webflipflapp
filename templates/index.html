@@ -1,21 +1,15 @@
-$def with (credentials, auth_url, login_url, logout_url, nickname, email, ud)
+$def with (info)
 
 $# set all statically loaded files for this template
 $var cssfiles: /static/wff.css
 $var jsfiles: /static/jquery-2.0.3.min.js
 $var title: webFlipFlapp
-$var login_link: $login_url
-$var logout_link: $logout_url
-$var user_email: $email
-$var nickname: $nickname
-$var has_cred: $credentials
-
-$# calculate the variables needed
-$ SPREADSHEETS = ud.spreadsheet_name.split(',')
-$ CALENDARS = ud.calendar_name.split(',')
-$ SSID = ud.spreadsheet_id.split(',')
-$ CLID = ud.calendar_id.split(',')
-
+$var login_link: $info['login_url']
+$var auth_link: $info['auth_url']
+$var logout_link: $info['logout_url']
+$var user_email: $info['email']
+$var nickname: $info['nickname']
+$var has_cred: $info['has_cred']
 
 <div class='wff-infobox'>
 <p class='wff-infobox-heading'>Welcome to the webFlipFlapp!</p>
@@ -29,7 +23,7 @@ $ CLID = ud.calendar_id.split(',')
 </div>
 
 
-$if credentials:
+$if info['has_cred']:
     <div class='wff-infobox'>
     <p class='wff-infobox-ok-heading'>Access</p>
     <p class='wff-infobox-ok-content'>Thank you. You granted WebFlipFlapp access to your Google Drive account and your Google Calendar account.</p>

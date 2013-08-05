@@ -78,6 +78,14 @@ def get_userdata(user):
         userdata.put()
     return userdata
 
+def get_header_info(user, deco):
+    return {'has_cred' : deco.has_credentials(),
+            'auth_url' : deco.authorize_url(),
+            'login_url' : users.create_login_url('/'),
+            'logout_url' : users.create_logout_url('/'),
+            'nickname' : user.nickname(),
+            'email' : user.email() }
+
 
 #-------------------------------------------------
 # Setting up the OAuth2 authorization and google-
@@ -125,13 +133,8 @@ class Index(FakeWebapp2RequestHandler):
     def GET(self):
         user = users.get_current_user()
         ud = get_userdata(user)
-        has_cred = decorator.has_credentials()
-        auth_url = decorator.authorize_url()
-        login_url = users.create_login_url('/')
-        logout_url = users.create_logout_url('/')
-        nickname = user.nickname()
-        email = user.email()
-        return render.index(has_cred, auth_url, login_url, logout_url, nickname, email, ud)
+        info = get_header_info(user, decorator)
+        return render.index(info)
 
 
 class Drive(FakeWebapp2RequestHandler):
@@ -140,6 +143,7 @@ class Drive(FakeWebapp2RequestHandler):
     def GET(self):
         user = users.get_current_user()
         ud = get_userdata(user)
+        info = get_header_info(user, decorator)
         http = decorator.http()
         tree = GoogleDrive.folder_structure(http=http, fields='items(iconLink)')
         selections = web.input(selected=[]).selected
@@ -157,7 +161,7 @@ class Drive(FakeWebapp2RequestHandler):
             if invalid:
                 raise web.seeother('/drive?'+'&'.join(['invalid=%s' % sid for sid in invalid]))
             ud.set_spreadsheet(",".join(ids), ",".join(names))
-        return render.drive(tree, ud, invalid)
+        return render.drive(tree, ud, invalid, info)
 
 
 class Calendar(FakeWebapp2RequestHandler):
