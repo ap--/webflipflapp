@@ -134,14 +134,12 @@ def set_schedule_on_Box(box, clid, evid, GoogleCalendar, http):
     enext = GoogleCalendar.get_instances(calendarId=clid, eventId=evid,
                 fields='items(start)', timeMin=tMin, timeMax=tMax, http=http)
     if len(enext) == 0:
-        box['scheduled'] = '...'
+        box['scheduled'] = 'N/A'
     else:
         scheduled= datetime.datetime.strptime(enext[0]['start']['date'],'%Y-%m-%d')
         scheduled.replace(**dayonly)
-        if scheduled <= today:
-            box['scheduled'] = 'overdue!'
-        else:
-            box['scheduled'] = 'in %d days' % (scheduled-today).days
+        diff = (scheduled-today).days
+        box['scheduled'] = 'in %d days' % diff if diff != 0 else 'today'
 
 
 def set_modified_on_Box(cellfeed, ssid, boxname):

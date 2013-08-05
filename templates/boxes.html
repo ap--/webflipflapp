@@ -44,31 +44,52 @@ $for ssid, ssname in zip(SSID,SPREADSHEETS):
         
         <!-- Calendar config -->
         <div class='wff-boxes-calendar-container'>
-        <p>$name</p>
-        $if box['mode'] == 'BOXADD':
-            <span><a href="javascript:void(0)" onclick="$$('#boxaddcalendar$(num)').show('fast')">add_to_calendar</a></span>
-        $elif box['mode'] == 'BOXOVERRIDE':
-            <span>WARNING: box has an id! Did you select the calendar?</span>
-            <span><a href="javascript:void(0)" onclick="$$('#boxaddcalendar$(num)').show('fast')">override id and add_to_calendar</a></span>
-        $else:
-            <span>scheduled next: $(scheduled)</span>
-        <span><a href='/boxes?flipped=True&ssid=$(boxid)&boxname=$(name)'>$(modified)</a></span>
+            <p>
+            <span><strong>$name</strong></span>
+            <span>scheduled: $(scheduled)</span>
+            <span><a href='/boxes?flipped=True&ssid=$(boxid)&boxname=$(name)'>$(modified)</a></span>
+            $if box['mode'] in ['BOXADD']:
+                <span><a href="javascript:void(0)" onclick="$$('#boxaddcalendar$(num)').show('fast')">add_to_calendar</a></span>
+            </p>
+            
+            $if box['mode'] in ['BOXOVERRIDE']:
+                <p><span>
+                WARNING: box has an id! Did you select the calendar?
+                <a href="javascript:void(0)" onclick="$$('#boxaddcalendar$(num)').show('fast')">override and add_to_calendar</a>
+                </span></p>
 
         <!-- BOXADD to Calendar menu -->
         $if box['mode'] in ['BOXADD', 'BOXOVERRIDE']:
             <div id='boxaddcalendar$(num)' style='display:none'>
             <form action="/boxes">
             <input style='display:none' name="add" value="True" />
-            <span>start: <input type='text' class="datepicker" name="start" size="12" /></span>
-            <span>every: <input name="freq" value="28" size='3'/>days. </span>
-            <span>location: <input type='text' name="location" size="20"/></span>
-            <span>calendar: <select name='clid'>
-            $for cc, cn in zip(CLID,CALENDARS):
-                <option value="$(cc)">$(cn)</option>
-            </select></span>
             <input style='display:none' name="ssid" value="$(boxid)" />
             <input style='display:none' name="boxname" value="$(name)" />
-            <input type="submit" value="add to calendar">
+            <table>
+                <tr>
+                    <td>start:</td>
+                    <td><input type='text' class="datepicker" name="start" size="12" /></td>
+                </tr>
+                <tr>
+                    <td>every:</td>
+                    <td><input name="freq" value="28" size='3'/>days.</td>
+                </tr>
+                <tr>
+                    <td>location:</td>
+                    <td><input type='text' name="location" size="20"/></td>
+                </tr>
+                <tr>
+                    <td>calendar:</td>
+                    <td><select name='clid'>
+                    $for cc, cn in zip(CLID,CALENDARS):
+                        <option value="$(cc)">$(cn)</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="submit" value="add to calendar"></td>
+                </tr>
+            </table>
             </form>
             </div>
         </div>
@@ -76,7 +97,11 @@ $for ssid, ssname in zip(SSID,SPREADSHEETS):
         <!-- THE BOX -->
 
         <div class='wff-footable-container'>
-        $if box['mode'] == 'BOXSHOW' and scheduled == 'overdue!':
+        $ OVERDUE = False    
+        $ ddd = scheduled.split()
+        $ if len(ddd) == 3 and int(ddd[1]) > 0: OVERDUE = False
+        $ else: OVERDUE = True
+        $if box['mode'] == 'BOXSHOW' and OVERDUE:
             <table class='footable'>
         $else:
             <table class='footable wff-box-flipped'>
