@@ -1,66 +1,48 @@
-$def with (credentials, auth_url, ud)
+$def with (credentials, auth_url, login_url, logout_url, nickname, email, ud)
+
+$# set all statically loaded files for this template
+$var cssfiles: /static/wff.css
+$var jsfiles: /static/jquery-2.0.3.min.js
+$var title: webFlipFlapp
+$var login_link: $login_url
+$var logout_link: $logout_url
+$var user_email: $email
+$var nickname: $nickname
+$var has_cred: $credentials
+
+$# calculate the variables needed
 $ SPREADSHEETS = ud.spreadsheet_name.split(',')
 $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
-<script src="/static/jquery-2.0.3.min.js"></script>
-<script>
-</script>
-</head>
-<body>
-<div class="wholedoc">    
-    
-<!-- The website title -->
-<div class="docheader">
-<h1><a href="/">WebFlipFlapp</a></h1>
-<h2>from __past__ import why_do_i_forget_that_every_single_time<br/>
-from __future__ import webflipflapp!</h2>
+
+
+<div class='wff-infobox'>
+<p class='wff-infobox-heading'>Welcome to the webFlipFlapp!</p>
+<p class='wff-infobox-content'>WebFlipFlapp is an online tool for managing things that you store in boxes, and need your attention every now and then. It's powered by Google App Engine and uses Google Drive and Google Calendar as backends for managing all important information. It allows you to easily share the "databases" (spreadsheets) and "schedules" (calendars) with friends or colleagues or colleagues who are friends.</p>
 </div>
 
-<!-- The navigation menu -->
-<div class="menu">
-    <span class="menuheader">menu:</span>
-    <span class="menuitem"><a href="/drive">choose spreadsheet</a></span>
-    <span class="menuitem"><a href="/calendar">choose calendar</a></span>
-    <span class="menuitem"><a href="/boxes">view boxes</a></span>
-</div> 
 
-<!-- The spreadsheet and calendar selection -->
-<div class="menu2">
-<dl>
-<dt class="menuheader2">spreadsheets:</dt>
-$for ss in SPREADSHEETS:
-    <dd>- $(ss)</dd>
-<dt class="menuheader2">calendars:</dt>
-$for cal in CALENDARS:
-    <dd>- $(cal)</dd>
-</dl>
-</div> 
+<div class='wff-infobox'>
+<p class='wff-infobox-heading'>Getting started</p>
+<p class='wff-infobox-content'>The only thing that you need to start using the webFlipFlapp is a google email account. Your google login is then used to authenticate yourself with the webFliFlapp. If you already have one, just go to the spreadsheet selection page or the calendar selection page. After choosing a spreadsheet, you can view it's contents on the view boxes page.</p>
+</div>
 
-<!-- The main body -->
-<div class="docbody">
 
-<p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
-<div class='info'>The interactive web 3.0 online cloud based WebFlipFlapp Google App Engine App is currently in pre alpha development state. Use it only if your desperate. And make sure to not bug the developer.</div>
-
-<p class='mainheading'>About</p>
-<div class='info'>WebFlipFlapp is a online tool for managing things that you store in boxes, and that need your attention every now and then. It's powered by Google App Engine and uses Google Drive and Google Calendar as backends for managing all important information. It allows you to easily share the "databases" (spreadsheets) and "schedules" (calendars) with friends or colleagues or colleagues who are friends.</div>
-
-<p class='mainheading'>Access</p>
-<div class='info'>
-$if credentials:    
-    Thank you. You granted WebFlipFlapp access to your Google Drive account and your Google Calendar account. <span style='color:#CCCCCC;font-style:italic'>MUHAHAHAHAHAHA...</span>
+$if credentials:
+    <div class='wff-infobox'>
+    <p class='wff-infobox-ok-heading'>Access</p>
+    <p class='wff-infobox-ok-content'>Thank you. You granted WebFlipFlapp access to your Google Drive account and your Google Calendar account.</p>
+    </div>
 $else:
-    You did not grant WebFlipFlapp access yet. To be of any use, please <a href="$(auth_url)">grant access</a> to your Google Drive account and your Google Calendar account.
-</div>
+    <div class='wff-infobox-warning'>
+    <p class='wff-infobox-warning-heading'>Access</p>
+    <p class='wff-infobox-warning-content'>You did not grant WebFlipFlapp access yet. To be of any use, please <a href="$(auth_url)">grant access</a> to your Google Drive account and your Google Calendar account.</p>
+    </div>
 
+
+<div class='wff-warningbox'>
+    <p class='wff-warningbox-heading'>Warning: lazy programmer</p>
+    <p class='wff-warningbox-content'>The interactive web 3.0 online cloud based WebFlipFlapp Google App Engine App is currently in pre alpha development state. Use it only if your desperate. And make sure to not bug the developer.</p>
 </div>
-<div id='footspacer'></div>
-<img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" />
-</div>
-</body>
-</html>
 

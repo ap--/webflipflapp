@@ -29,6 +29,7 @@ from google.appengine.api import users
 ### Flyflippingdstuff
 import flyboxes
 import datetime
+import mobile
 
 ### Debugging
 import pprint
@@ -116,7 +117,7 @@ def printerrors(prefix):
 # RequestHandlers
 #
 
-render = web.template.render('templates/', globals=template_globals)
+render = web.template.render('templates/', globals=template_globals, base='layout')
 
 class Index(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1034.5: we encountered a')
@@ -126,7 +127,11 @@ class Index(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         has_cred = decorator.has_credentials()
         auth_url = decorator.authorize_url()
-        return render.index(has_cred, auth_url, ud)
+        login_url = users.create_login_url('/')
+        logout_url = users.create_logout_url('/')
+        nickname = user.nickname()
+        email = user.email()
+        return render.index(has_cred, auth_url, login_url, logout_url, nickname, email, ud)
 
 
 class Drive(FakeWebapp2RequestHandler):
@@ -181,6 +186,7 @@ class Boxes(FakeWebapp2RequestHandler):
         user = users.get_current_user()
         ud = get_userdata(user)
         http = decorator.http()
+        MOBILE = mobile.is_mobile(web.ctx.env['HTTP_USER_AGENT'])
         data = web.input(pdf=None, flipped=None, add=None)
         # IF A BOX GOT FLIPPED
         if bool(data.flipped):
@@ -222,7 +228,7 @@ class Boxes(FakeWebapp2RequestHandler):
         for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
             flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
 
-        return render.boxes(SSCOLL, ud)
+        return render.boxes(SSCOLL, ud, MOBILE)
 
 
 """
