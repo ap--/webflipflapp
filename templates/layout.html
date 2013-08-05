@@ -6,7 +6,7 @@ $def with (content)
         $for f in content.cssfiles.split():
             <link rel="stylesheet" href="$f" type="text/css" /> 
     $if content.jsfiles:   
-        $for f in content.cssfiles.split():
+        $for f in content.jsfiles.split():
             <script src="$f"></script>
     <title>$content.title</title>        
 </head>

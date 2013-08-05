@@ -100,7 +100,7 @@ html {
 
 .wff-infobox {
   margin-top: 20px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   margin-left: 5px;
   margin-right: 5px;
   border-radius: 8px;
@@ -178,9 +178,45 @@ html {
   font-size: 1em;
   line-height: 1.2em;
 }
+.wff-infobox-warning-heading {
+  color: #EEE;
+  padding: 7;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border: 1px solid #000;
+  text-decoration: none;
+  letter-spacing: 0px;
+  font-size: 1em;
+  line-height: 1.2em;
+  font-weight: bold;
+  background-image: -ms-linear-gradient(top, #AA0000 0%, #330000 100%);
+  background-image: -moz-linear-gradient(top, #AA0000 0%, #330000 100%);
+  background-image: -o-linear-gradient(top, #AA0000 0%, #330000 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #AA0000), color-stop(1, #330000));
+  background-image: -webkit-linear-gradient(top, #AA0000 0%, #330000 100%);
+  background-image: linear-gradient(to bottom, #AA0000 0%, #330000 100%);
+}
+.wff-infobox-warning-content {
+  font-family: 'Courier New';
+  text-align: justify;
+  color: #222;
+  padding: 5 10 5 10;
+  background-color: #F0F0F0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom: 1px solid #333;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+  text-decoration: none;
+  word-spacing: 0.1em;
+  letter-spacing: -1px;
+  font-size: 1em;
+  line-height: 1.2em;
+}
+
 .wff-footable-container {
-  margin-top: 20px;
-  margin-bottom: 10px;
+  margin-top: 0px;
+  margin-bottom: 30px;
   margin-left: 5px;
   margin-right: 5px;
   border-radius: 8px;
@@ -197,8 +233,35 @@ html {
   width: 50px;
   height: 20px;
 }
+.wff-boxes-spreadsheet-heading {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: #666666;
+  font-size: 1.3em;
+  text-align: center;
+  border-bottom: 2px solid #666666;
+}
 
+.wff-boxes-calendar-container {
+  border-top-left-radius: 8px;
+  -moz-border-top-left-radius: 8px;
+  -webkit-border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  -moz-border-top-right-radius: 8px;
+  -webkit-border-top-right-radius: 8px;
+  margin-bottom: 0px;
+  margin-left: 10px;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  border-top: 1px solid #000;
+  padding: 7px;
+  width: 70%;
+  background-color: #eeeeee;
+}
 
+.wff-boxes-calendar-container p {
+  font-weight: bold;
+}
 
 
 

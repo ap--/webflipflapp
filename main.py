@@ -170,6 +170,7 @@ class Calendar(FakeWebapp2RequestHandler):
     def GET(self):
         user = users.get_current_user()
         ud = get_userdata(user)
+        info = get_header_info(user, decorator)
         http = decorator.http()
         cldr = GoogleCalendar.list_calendars(http=http, fields='items(id,summary)')
         selections = web.input(selected=[]).selected
@@ -180,7 +181,7 @@ class Calendar(FakeWebapp2RequestHandler):
                 ids.append(selected)
                 names.append(name)
             ud.set_calendar(",".join(ids), ",".join(names))
-        return render.calendar(cldr, ud)
+        return render.calendar(cldr, ud, info)
 
 
 class Boxes(FakeWebapp2RequestHandler):
@@ -189,6 +190,7 @@ class Boxes(FakeWebapp2RequestHandler):
     def GET(self):
         user = users.get_current_user()
         ud = get_userdata(user)
+        info = get_header_info(user, decorator)
         http = decorator.http()
         MOBILE = mobile.is_mobile(web.ctx.env['HTTP_USER_AGENT'])
         data = web.input(pdf=None, flipped=None, add=None)
@@ -232,7 +234,7 @@ class Boxes(FakeWebapp2RequestHandler):
         for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
             flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
 
-        return render.boxes(SSCOLL, ud, MOBILE)
+        return render.boxes(SSCOLL, ud, MOBILE, info)
 
 
 """

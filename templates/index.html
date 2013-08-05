@@ -29,14 +29,14 @@ $if info['has_cred']:
     <p class='wff-infobox-ok-content'>Thank you. You granted WebFlipFlapp access to your Google Drive account and your Google Calendar account.</p>
     </div>
 $else:
-    <div class='wff-infobox-warning'>
+    <div class='wff-infobox'>
     <p class='wff-infobox-warning-heading'>Access</p>
-    <p class='wff-infobox-warning-content'>You did not grant WebFlipFlapp access yet. To be of any use, please <a href="$(auth_url)">grant access</a> to your Google Drive account and your Google Calendar account.</p>
+    <p class='wff-infobox-warning-content'>You did not grant WebFlipFlapp access yet. To be of any use, please <a href="$(info['auth_url'])">grant access</a> to your Google Drive account and your Google Calendar account.</p>
     </div>
 
 
-<div class='wff-warningbox'>
-    <p class='wff-warningbox-heading'>Warning: lazy programmer</p>
-    <p class='wff-warningbox-content'>The interactive web 3.0 online cloud based WebFlipFlapp Google App Engine App is currently in pre alpha development state. Use it only if your desperate. And make sure to not bug the developer.</p>
+<div class='wff-infobox'>
+    <p class='wff-infobox-warning-heading'>Warning: lazy programmer</p>
+    <p class='wff-infobox-warning-content'>The interactive web 3.0 online cloud based WebFlipFlapp Google App Engine App is currently in pre alpha development state. Use it only if your desperate. And make sure to not bug the developer.</p>
 </div>
 

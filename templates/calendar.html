@@ -1,77 +1,54 @@
-$def with (cl, ud)
+$def with (cl, ud, info)
+
+$# set all statically loaded files for this template
+$var cssfiles: /static/wff.css /static/footable.core.css /static/footable.standalone.css
+$var jsfiles: /static/jquery-2.0.3.min.js /static/footable.js
+$var title: webFlipFlapp
+$var login_link: $info['login_url']
+$var auth_link: $info['auth_url']
+$var logout_link: $info['logout_url']
+$var user_email: $info['email']
+$var nickname: $info['nickname']
+$var has_cred: $info['has_cred']
+
 $ SPREADSHEETS = ud.spreadsheet_name.split(',')
 $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="/static/webflipflapp.css" /> 
-<script src="/static/jquery-2.0.3.min.js"></script>
+
+<!--
 <script>
+    $$(function() {
+        $$('.footable').footable();
+    });
 </script>
-</head>
-<body>
-<div class="wholedoc">    
-    
-<!-- The website title -->
-<div class="docheader">
-<h1><a href="/">WebFlipFlapp</a></h1>
-<h2>from __past__ import why_do_i_forget_that_every_single_time<br/>
-from __future__ import webflipflapp!</h2>
+-->
+
+<div class='wff-infobox'>
+    <p class='wff-infobox-heading'>Spreadsheet selection</p>
+    <p class='wff-infobox-content'>Choose one or several calendars that are going to be used for scheduling the boxes. If you want to create a new calendar, please do that via the <a href="https://www.google.com/calendar">Google Calendar</a> web interface. Refresh this page after.</p>
 </div>
-
-<!-- The navigation menu -->
-<div class="menu">
-    <span class="menuheader">menu:</span>
-    <span class="menuitem"><a href="/drive">choose spreadsheet</a></span>
-    <span class="menuitem"><a href="/calendar">choose calendar</a></span>
-    <span class="menuitem"><a href="/boxes">view boxes</a></span>
-</div> 
-
-<!-- The spreadsheet and calendar selection -->
-<div class="menu2">
-<dl>
-<dt class="menuheader2">spreadsheets:</dt>
-$for ss in SPREADSHEETS:
-    <dd>- $(ss)</dd>
-<dt class="menuheader2">calendars:</dt>
-$for cal in CALENDARS:
-    <dd>- $(cal)</dd>
-</dl>
-</div> 
-
-<!-- The main body -->
-<div class="docbody">
     
-<p class='mainheading' style='color:#7A1C1C'>Warning: lazy programmer</p>
-<div class='info'>If you want to create a new calendar, please do that via the <a href="https://www.google.com/calendar">Google Calendar</a> web interface. Refresh this page after and do not bug the developer.</div>
-<p class='mainheading'>Your Google Calendars</p>
 <form name='input' action="/calendar" method='get'>
-<div class='info'>Choose a calendar that is used to store reminders.</div>
-<table class='drivetable'>
-    <tr class='drivetableheader'>
+<div class='wff-footable-container'>
+<table class='footable'>
+<thead>
+    <tr class=''>
         <th>Calendar</th>
         <th>Choice</th>
     </tr>
+</thead>
+<tbody>
 $for ccc in sorted(cl, key=(lambda x: x['summary'])):
     $ checked = 'checked' if ccc['id'] in CLID else ''
-    $if loop.even:
-        <tr class='drivetableeven'>
-    $else:
-        <tr class='drivetableodd'>
-    <td style='text-align:left'>        
-    <div>$(ccc['summary'])</div>
-    </td>
-    <td style='text-align:center'>
-    <input type="checkbox" name="selected" value="$(ccc['id'])" $(checked) /></td>
+    <tr>
+    <td>$(ccc['summary'])</td>
+    <td style="text-align: center"><input type='checkbox' name='selected' value="$(ccc['id'])" $(checked)/></td>
     </tr>
+</tbody>
 </table>
-<div class='info' style='text-align:right'><input type='submit' value='Choose'></div>
+</div>
+<div class='info' style='text-align:right'><input type='submit' style='wff-submit-btn' value='Choose'></div>
 </form>
 
-<div id='footspacer'></div>
-<img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" />
-</div>
-</body>
-</html>
 
