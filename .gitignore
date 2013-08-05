@@ -1,1 +1,5 @@
 *.pyc
+*.min.css
+*.min.js
+
+templates/__init__.py
