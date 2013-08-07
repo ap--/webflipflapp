@@ -29,7 +29,6 @@ from google.appengine.api import users
 ### Flyflippingdstuff
 import flyboxes
 import datetime
-import mobile
 
 ### Debugging
 import pprint
@@ -192,49 +191,67 @@ class Boxes(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
         http = decorator.http()
-        MOBILE = mobile.is_mobile(web.ctx.env['HTTP_USER_AGENT'])
-        data = web.input(pdf=None, flipped=None, add=None)
-        # IF A BOX GOT FLIPPED
-        if bool(data.flipped):
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
-            args = flyboxes.set_modified_on_Box(cellfeed, data.ssid, data.boxname)
-            GoogleSpreadsheets.set_cell(*args, http=http)
-            raise web.seeother('/boxes')
-        # IF PDF is requested we can stop here
-        if bool(data.pdf):
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
-            BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
-            error, data = flyboxes.choose_pdf_from_boxes(data.ssid, data.boxname, BOXES)
-            web.header('Content-Type','text/plain' if error else 'application/pdf')
-            return data
-        # IF BOX is ADDED to CALENDAR
-        if bool(data.add):
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
-            BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
-            box = next(b for b in BOXES if b['name'] == data.boxname)
-            desc = '%s :: %s' % (box['name'], box['ssid'])
-            nev = GoogleCalendar.add_recurring_1day_event(calendarId=data.clid,
-                    summary=box['name'], description=desc, start=data.start,
-                    recurrence_days=data.freq, location=data.location, http=http)
-            args = flyboxes.set_calid_on_Box(cellfeed, data.ssid, data.boxname, data.clid, nev['id'])
-            GoogleSpreadsheets.set_cell(*args, http=http)
-            raise web.seeother('/boxes')
-
-        # ELSE: 
+        data = web.input(flipped=None, add=None)
         # GET SELECTED SPREADSHEETS:
         SSCOLL = {}
         for ssid in ud.spreadsheet_id.split(','):
             cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            # If a box got flipped
+            if bool(data.flipped) and data.ssid == ssid:
+                args = flyboxes.set_modified_on_Box(cellfeed, data.ssid, data.boxname)
+                GoogleSpreadsheets.set_cell(*args, http=http)
+                cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            # If a box got added to the calendar
+            if bool(data.add) and data.ssid == ssid:
+                BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
+                box = next(b for b in BOXES if b['name'] == data.boxname)
+                desc = '%s :: %s' % (box['name'], box['ssid'])
+                nev = GoogleCalendar.add_recurring_1day_event(calendarId=data.clid,
+                        summary=box['name'], description=desc, start=data.start,
+                        recurrence_days=data.freq, location=data.location, http=http)
+                args = flyboxes.set_calid_on_Box(cellfeed, data.ssid, data.boxname, data.clid, nev['id'])
+                GoogleSpreadsheets.set_cell(*args, http=http)
+                cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            
             SSCOLL[ssid] = flyboxes.get_boxes_from_cellfeed(cellfeed)
         # GET EVENTS
         CLCOLL = {}
         for clid in ud.calendar_id.split(','):
             CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
-
+        # SET SCHEDULING DATES
         for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
             flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
 
-        return render.boxes(SSCOLL, ud, MOBILE, info)
+        return render.boxes(SSCOLL, ud, info)
+
+
+
+class PdfLabels(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1561.8: Humans are highly illogical')
+    @decorator.oauth_required
+    def GET(self):
+        data = web.input(box=[])
+        store = {}
+        for ssb in data.box:
+            ssid, boxname = ssb.split('/')
+            store[ssid] = store.get(ssid, []) + [boxname]
+
+        Flies = []
+        for ssid, boxnames in store.iteritems():
+            cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            boxes = flyboxes.get_boxes_from_cellfeed(cf)
+            
+            for boxname in boxnames:
+                Flies.extend(flyboxes.get_flies_from_box(ssid, boxname, boxes))
+        
+        URL, OPTIONS = flyboxes.pdflink_from_flies(Flies)
+        
+        r = requests.put(URL, data=OPTIONS)
+        r.raise_for_status()
+        
+        web.header('Content-Type','application/pdf')
+        return r.content
+
 
 
 """

@@ -1,7 +1,10 @@
 
+import datetime
 import re
 import requests
-import datetime
+import random
+import string
+
 from gdata.spreadsheets.data import CellEntry, Cell
 
 
@@ -57,7 +60,7 @@ def get_boxes_from_cellfeed(cellfeed):
         if by == 0 and bx == 3: BOXES[-1]['calid'] = v
         if by == 1: BOXES[-1].setdefault('labels', {})[bx] = v
         if by >= 2: BOXES[-1].setdefault('elements', {})[(by,bx)] = v
-    # get flies, and pdf
+    # get flies
     for b in BOXES:
         elements = b.pop('elements', {}) 
         ylen, xlen = b.pop('size')
@@ -66,10 +69,10 @@ def get_boxes_from_cellfeed(cellfeed):
         for j in range(2,ylen+1):
             fly = {labels[i]:elements.get((j,i),'') for i in range(1, xlen+1) }
             b['flies'].append(fly)
-        b['pdf'] = LabelGenerator.pdflink_from_box(b)
     
     return BOXES
 
+"""
 def choose_pdf_from_boxes(ssid, name, boxes):
     for b in boxes:
         if b['name'] == name and b['ssid'] == ssid:
@@ -83,6 +86,13 @@ def choose_pdf_from_boxes(ssid, name, boxes):
                 raise
             return True, "Error: when generating the pdf"
     return True, "Error: box not found"
+"""
+
+def get_flies_from_box(ssid, name, boxes):
+    for b in boxes:
+        if b['name'] == name and b['ssid'] == ssid:
+            return b['flies']
+    return []
 
 
 def compare_boxes_and_events_coll(sscoll, clcoll):
@@ -247,20 +257,26 @@ class LabelGenerator(object):
         return URL, OPTIONS
     
     @classmethod
-    def pdflink_from_box(cls, box, out='pdf.out', dpi=600, keys=None):
+    def pdflink_from_box(cls, box, out, dpi, keys):
+        return cls.pdflink_from_flies(box['flies'], out, dpi, keys)
+
+    @classmethod
+    def pdflink_from_flies(cls, flies, out=None, dpi=600, keys=None):
         if keys is None:
-            keys = ['Label', 'Modifier1',
+            keys = ['Label', '',
                     'Short Identifier','Genotype','---date---']
         if len(keys) != 5:
             raise ValueError("pdflink_from_box requires 5 labelkeys")
-        LG = cls()
         di = keys.index('---date---')
-        for fly in box['flies']:
+        LG = cls()
+        for fly in flies:
             fget = lambda x : fly.get(x, '')
             INP = ["".join(map(fget, k.split('---'))) for k in keys]
             if di >= 0: INP[di] = LG._date
             LG.add_label(*INP)
-        out = box['name'].replace(':','')+'.pdf'
+        if out is None:
+            CHARS = string.ascii_uppercase + string.digits
+            out = "LABELS_%s.pdf" % "".join(
+                random.choice(CHARS) for _ in range(6) )
         return LG.pdflink(out, dpi)
-
 
