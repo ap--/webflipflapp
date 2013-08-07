@@ -11,7 +11,7 @@ CFILES = $(filter-out $(wildcard $(CDIR)/*.min.css), $(wildcard $(CDIR)/*.css))
 CMFILES = $(addsuffix .min.css, $(basename $(CFILES)))
 
 %.min.css: %.css
-	curl -X POST -s --data-urlencode 'input@$<' http://cssminifier.com/raw > $@
+	curl -0 -X POST -s --data-urlencode "input@$<" http://cssminifier.com/raw > $@
 
 css: $(CMFILES)
 
