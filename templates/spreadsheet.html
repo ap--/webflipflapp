@@ -1,0 +1,42 @@
+$def with (ssid, boxes)
+<html><head><title>$(ssid)</title></head><body>
+<div class="wff-all-boxes-expand">
+$ N = len(boxes)
+<p class='wff-boxes-spreadsheet-heading'><a>Spreadsheet $(ssid)</a></p>
+
+<div class="wff-boxcontainer">
+$for num, box in enumerate(boxes):
+    $ _labels = box['labels']
+    $ M = max(_labels.keys())
+    $ labels = [_labels.get(i, '') for i in range(1, M+1)]
+    $ flies = box['flies']
+    <div class='wff-box wff-footable-container footable-noleftcorner' id='boxdata-$(ssid)-$(num)'>
+    <ul class='wff-box-meta'>
+        <li>boxname: $(box['name'])</li>
+        <li>ssId: $(box['ssid'])</li>
+        <li>wsId: $(box['wsid'])</li>
+        <li>calId: $(box['calid'])</li>
+        <li>modified: $(box['modified'])</li>
+        <li>mode: $(box['mode'])</li>
+    </ul>   
+    <table data-filter="#filter" class='footable footable-noleftcorner'>
+    <thead class='footable-noleftcorner'><tr>
+        $for label in labels:
+            $if label == 'Label':
+                <th data-class='expand'>$(label)</th>
+            $elif label == 'Short Identifier':
+                <th>$(label)</th>
+            $elif label in ['X', 'Y', 'C2a', 'C2b', 'C3a','C3b']:
+                <th data-hide='phone,tablet'>$(label)</th>
+            $else:
+                <th data-hide='phone'>$(label)</th>
+    </tr></thead>
+    <tbody>
+        $for fly in flies:
+            <tr>$:"".join(["<td>%s</td>" % fly.get(label, '') for label in labels])</tr>
+    </tbody>
+    </table>
+    </div>
+</div>
+</div>
+</body></html>

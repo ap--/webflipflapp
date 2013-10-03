@@ -125,6 +125,7 @@ def printerrors(prefix):
 #
 
 render = web.template.render('templates/', globals=template_globals, base='layout')
+render_wo_layout = web.template.render('templates/', globals=template_globals)
 
 class Index(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1034.5: we encountered a')
@@ -225,6 +226,19 @@ class Boxes(FakeWebapp2RequestHandler):
         return render.boxes(SSCOLL, ud, info)
 
 
+class Spreadsheet(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1820.2: Space, the final frontier')
+    @decorator.oauth_required
+    def GET(self):
+        http = decorator.http()
+        data = web.input(ssid=None)
+        if data.ssid is None:
+            raise Exception("no ssid query parameter")
+        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
+        boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        return render_wo_layout.spreadsheet(data.ssid, boxes)
+
+
 
 class PdfLabels(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1561.8: Humans are highly illogical')
@@ -261,10 +275,11 @@ class PdfLabels(FakeWebapp2RequestHandler):
 """
 appoauth = decorator.callback_application()
 
-urls = ( "/",           "Index",
-         "/drive",      "Drive",
-         "/calendar",   "Calendar",
-         "/boxes",      "Boxes",
+urls = ( "/",            "Index",
+         "/drive",       "Drive",
+         "/calendar",    "Calendar",
+         "/boxes",       "Boxes",
+         "/spreadsheet", "Spreadsheet",
        )
 
 appgae = web.application(urls, globals()).wsgifunc()
