@@ -1,7 +1,7 @@
 $def with (content)
 <html>
 <head>
-    <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     $if content.cssfiles:
         $for f in content.cssfiles.split():
             <link rel="stylesheet" href="$f" type="text/css" /> 
