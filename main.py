@@ -193,8 +193,12 @@ class Boxes(FakeWebapp2RequestHandler):
         info = get_header_info(user, decorator)
         http = decorator.http()
         data = web.input(flipped=None, add=None)
+
         # GET SELECTED SPREADSHEETS:
         SSCOLL = {}
+        if len(ud.spreadsheet_id.split(',')[0]) == 0:
+            web.seeother('/drive')
+
         for ssid in ud.spreadsheet_id.split(','):
             cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
             # If a box got flipped
@@ -215,10 +219,15 @@ class Boxes(FakeWebapp2RequestHandler):
                 cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
             
             SSCOLL[ssid] = flyboxes.get_boxes_from_cellfeed(cellfeed)
+
         # GET EVENTS
         CLCOLL = {}
+        if len(ud.calendar_id.split(',')[0]) == 0:
+            web.seeother('/calendar')
+        
         for clid in ud.calendar_id.split(','):
-            CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
+            if len(clid) > 0:
+                CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
         # SET SCHEDULING DATES
         for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
             flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
