@@ -277,6 +277,10 @@ html {
   border-bottom: 1px solid #000;
   margin-bottom: 5px;
 }
+.wff-box-meta {
+  display: none;
+}
+
 
 /*
  70 .footable.wff-box-flipped > thead > tr > th,
