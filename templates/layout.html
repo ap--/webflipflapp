@@ -25,10 +25,9 @@ $def with (content)
   <div class="wff-header-navigation" id="wff-logout">
    <ul>
     $if content.has_cred:
-        <li><a>$content.nickname</a></li>
-        <li><a href="$content.logout_link" title="logout: $content.user_email">logout</a></li>
+        <li><a href="$content.logout_link" title="user: $content.user_email">logout</a></li>
     $else:
-        <li><a href="$content.login_link" title="login!">login</a></li>
+        <li><a href="$content.login_link" title="login">login</a></li>
    </ul>
   </div>
  </div>
