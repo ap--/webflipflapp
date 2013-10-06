@@ -1,11 +1,10 @@
 
+import cgi
 import datetime
 import re
-import requests
 import random
 import string
 
-from gdata.spreadsheets.data import CellEntry, Cell
 
 
 class FlyBoxError(Exception):
@@ -13,30 +12,17 @@ class FlyBoxError(Exception):
 
 
 class Box(dict):
-
-    def __init__(self, spreadsheet_cellfeed):
-        self._cellfeed = spreadsheet_cellfeed
-
-        if not self._cellfeed:
-            raise FlyBoxError('%s: cellfeed empty' % self.__class__.__name__)
-        else:
-            url = self._cellfeed[0].get_id()
-            result = re.search('cells/(?P<ssid>[^/]*)/(?P<wsid>[^/]*)/', url)
-            self._ssid = result.group('ssid')
-            self._wsid = result.group('wsid')
-
-        default = { 'ssid'          : self._ssid,
-                    'wsid'          : self._wsid,
-                    'calid'         : '',
-                    'modified'      : 'flipped: N/A',
-                    'name'          : '',
-                    'labels'        : {}, # dict of {col : value}
-                    'elements'      : {}, # dict of {(row,col) : value}
+    def __init__(self, ssid, wsid):
+        default = { 'ssid'          : ssid,
+                    'wsid'          : wsid,
+                    'calid'         : 'N/A',
+                    'flipped'       : 'N/A',
+                    'name'          : 'N/A',
+                    'labels'        : [],
                     'flies'         : [],
-                    'size'          : [0,0],
                     'mode'          : '' }
-
         super(Box, self).__init__(default)
+
 
 
 def get_boxes_from_cellfeed(cellfeed):
@@ -44,49 +30,53 @@ def get_boxes_from_cellfeed(cellfeed):
     BOXES = []
     y_old = y_off = -2
     ym, xm = 0, 0
-    store = [(int(c.cell.row),int(c.cell.col),c.content.text) for c in cellfeed]
-    for y,x,v in store:
+    ssid, wsid = None, None
+    for c in cellfeed:
+        # On first run get ssid and wsid
+        if (ssid is None) and (wsid is None):
+            url = c.get_id()
+            result = re.search('cells/(?P<ssid>[^/]*)/(?P<wsid>[^/]*)/', url)
+            ssid = result.group('ssid')
+            wsid = result.group('wsid')
+        # get contents
+        y = int(c.cell.row)
+        x = int(c.cell.col)
+        v = cgi.escape(c.content.text)
+        # skip the first two lines
         if y < 3:
             continue
+        # ignore everything after a #WFF-IGNORE
+        if x == 1 and v == "#WFF-IGNORE":
+            break
+        # seperate boxes
         if y - y_old < 2:
             y_old = y
         else:
             y_off = y_old = y
-            BOXES.append(Box(cellfeed))
+            BOXES.append(Box(ssid, wsid))
         by, bx = y-y_off, x
-        BOXES[-1]['size'][:] = map(max,zip([by,bx],BOXES[-1]['size']))
-        if by == 0 and bx == 1: BOXES[-1]['name'] = v
-        if by == 0 and bx == 2: BOXES[-1]['modified'] = v
-        if by == 0 and bx == 3: BOXES[-1]['calid'] = v
-        if by == 1: BOXES[-1].setdefault('labels', {})[bx] = v
-        if by >= 2: BOXES[-1].setdefault('elements', {})[(by,bx)] = v
+        lastBox = BOXES[-1]
+        lastBox['_width'] = max(bx, lastBox.get('_width', 0))
+        lastBox['_height'] = max(by, lastBox.get('_height', 0))
+        if by == 0 and bx == 1: lastBox['name'] = v
+        if by == 0 and bx == 2: lastBox['flipped'] = v
+        if by == 0 and bx == 3: lastBox['calid'] = v
+        if by == 1: lastBox.setdefault('_labels', {})[bx] = v
+        if by >= 2: lastBox.setdefault('_elements', {})[(by,bx)] = v
     # get flies
     for b in BOXES:
-        elements = b.pop('elements', {}) 
-        ylen, xlen = b.pop('size')
-        labels = b.get('labels', {})
-        b['flies'] = []
+        elements = b.pop('_elements', {}) 
+        ylen, xlen = b.pop('_height', 0), b.pop('_width', 0)
+        labels = b.pop('_labels', {})
+        for i in range(1, xlen+1):
+            b['labels'].append(labels.get(i, ''))
         for j in range(2,ylen+1):
             fly = {labels[i]:elements.get((j,i),'') for i in range(1, xlen+1) }
             b['flies'].append(fly)
     
     return BOXES
 
-"""
-def choose_pdf_from_boxes(ssid, name, boxes):
-    for b in boxes:
-        if b['name'] == name and b['ssid'] == ssid:
-            URL, OPTIONS = b['pdf']
-            # for some reason, we need a PUT request...
-            r = requests.put(URL, data=OPTIONS)
-            try:
-                r.raise_for_status()
-                return False, r.content
-            except:
-                raise
-            return True, "Error: when generating the pdf"
-    return True, "Error: box not found"
-"""
+
 
 def get_flies_from_box(ssid, name, boxes):
     for b in boxes:
