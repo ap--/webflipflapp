@@ -1,8 +1,8 @@
-$def with (sscoll, ud, info)
+$def with (ud, info)
 
 $# set all statically loaded files for this template
 $var cssfiles: //ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css /static/css/footable.core.min.css /static/css/footable.wff.min.css /static/css/wff.min.css
-$var jsfiles: //ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js //ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js /static/js/footable.min.js /static/js/footable.filter.js
+$var jsfiles: //ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js //ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js /static/js/footable.min.js /static/js/footable.filter.js /static/js/wff.js
 $var title: webFlipFlapp
 $var login_link: $info['login_url']
 $var auth_link: $info['auth_url']
@@ -18,39 +18,9 @@ $ CLID = ud.calendar_id.split(',')
 
 <script>
     $for ssid, ssname in zip(SSID,SPREADSHEETS):
-        $$(function() {
-            $$.get('/spreadsheet', { ssid: "$(ssid)" }, function(data) {
-            var html = jQuery("<div>").html(data);
-            var boxes = html.find('.wff-boxcontainer').children('.wff-box');
-            for (var i=0;i<boxes.length;i++)
-            {
-                var box = boxes.eq(i);
-                var BoxHeader = "";
-                BoxHeader += "<div class='wff-boxes-calendar-container wff-minimized' id='boxheader" + i + "'>";
-                BoxHeader += "<p><span><strong><a></a></strong></span>";
-                BoxHeader += "<p><span><strong><a onclick='viewBox("+i+")'></a></strong></span>"
-                BoxHeader += "<span>scheduled: </span>";
-                BoxHeader += "<span><a href='/boxes?flipped=True&ssid=$(ssid)&boxname='></a></span></div>";
-                box.prepend(BoxHeader);
-                $$("#wff-boxes-container-$(ssid)").append(box);
-            };
-            $$('#wff-boxes-heading-$(ssid) a').text('$(ssname)');
-            $$(".footable").footable();
-            $$(".datepicker").datepicker({ dateFormat: "yy-mm-dd" });
-            });
-        });
-    var viewBox = function( num ) {
-        $$("#boxheader" + num).toggleClass('wff-minimized');
-        $$("#boxdata" + num).toggle('fast');
-        $$(".footable").resize();
-    };
-    var viewAllBoxes = function( num, Nb ) {
-        k = parseInt(num) + 1;
-        N = k + parseInt(Nb);
-        while (k < N) { viewBox(k); k = k + 1; };
-    };
-    
+        loadSpreadsheet("$ssid", "$ssname");
 </script>
+
 
 <div class='wff-infobox'>
     <p class='wff-infobox-heading'>Boxes</p>
