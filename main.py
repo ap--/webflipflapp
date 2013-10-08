@@ -192,47 +192,47 @@ class Boxes(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
         http = decorator.http()
-        data = web.input(flipped=None, add=None)
+        # data = web.input(flipped=None, add=None)
 
         # GET SELECTED SPREADSHEETS:
-        SSCOLL = {}
+        #SSCOLL = {}
         if len(ud.spreadsheet_id.split(',')[0]) == 0:
             web.seeother('/drive')
 
-        for ssid in ud.spreadsheet_id.split(','):
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-            # If a box got flipped
-            if bool(data.flipped) and data.ssid == ssid:
-                args = flyboxes.set_modified_on_Box(cellfeed, data.ssid, data.boxname)
-                GoogleSpreadsheets.set_cell(*args, http=http)
-                cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-            # If a box got added to the calendar
-            if bool(data.add) and data.ssid == ssid:
-                BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
-                box = next(b for b in BOXES if b['name'] == data.boxname)
-                desc = '%s :: %s' % (box['name'], box['ssid'])
-                nev = GoogleCalendar.add_recurring_1day_event(calendarId=data.clid,
-                        summary=box['name'], description=desc, start=data.start,
-                        recurrence_days=data.freq, location=data.location, http=http)
-                args = flyboxes.set_calid_on_Box(cellfeed, data.ssid, data.boxname, data.clid, nev['id'])
-                GoogleSpreadsheets.set_cell(*args, http=http)
-                cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-            
-            SSCOLL[ssid] = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        #for ssid in ud.spreadsheet_id.split(','):
+        #    cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+        #    # If a box got flipped
+        #    if bool(data.flipped) and data.ssid == ssid:
+        #        args = flyboxes.set_modified_on_Box(cellfeed, data.ssid, data.boxname)
+        #        GoogleSpreadsheets.set_cell(*args, http=http)
+        #        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+        #    # If a box got added to the calendar
+        #    if bool(data.add) and data.ssid == ssid:
+        #        BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        #        box = next(b for b in BOXES if b['name'] == data.boxname)
+        #        desc = '%s :: %s' % (box['name'], box['ssid'])
+        #        nev = GoogleCalendar.add_recurring_1day_event(calendarId=data.clid,
+        #                summary=box['name'], description=desc, start=data.start,
+        #                recurrence_days=data.freq, location=data.location, http=http)
+        #        args = flyboxes.set_calid_on_Box(cellfeed, data.ssid, data.boxname, data.clid, nev['id'])
+        #        GoogleSpreadsheets.set_cell(*args, http=http)
+        #        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+        #    
+        #    SSCOLL[ssid] = flyboxes.get_boxes_from_cellfeed(cellfeed)
 
         # GET EVENTS
-        CLCOLL = {}
-        if len(ud.calendar_id.split(',')[0]) == 0:
-            web.seeother('/calendar')
+        #CLCOLL = {}
+        #if len(ud.calendar_id.split(',')[0]) == 0:
+        #    web.seeother('/calendar')
         
-        for clid in ud.calendar_id.split(','):
-            if len(clid) > 0:
-                CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
+        #for clid in ud.calendar_id.split(','):
+        #    if len(clid) > 0:
+        #        CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
         # SET SCHEDULING DATES
-        for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
-            flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
+        #for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
+        #    flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
 
-        return render.boxes(SSCOLL, ud, info)
+        return render.boxes(ud, info)
 
 
 class Spreadsheet(FakeWebapp2RequestHandler):
