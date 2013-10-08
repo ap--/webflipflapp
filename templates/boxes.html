@@ -62,11 +62,9 @@ $ CLID = ud.calendar_id.split(',')
     <p class='wff-infobox-content'>filter all items for <input id="filter" type="text"/>.</p>
 </div>
 
-
 <div class="wff-all-boxes-expand">
-$ num = -1
 $for ssid, ssname in zip(SSID,SPREADSHEETS):
-    <p class='wff-boxes-spreadsheet-heading' id="wff-boxes-heading-$(ssid)"><a>$(ssname) loading...</a></p>
-    <div class='wff-boxes-spreadsheet-container' id="wff-boxes-container-$(ssid)"></div>
+    <p class='wff-boxes-spreadsheet-heading' id="wff-boxes-spreadsheet-heading-$(ssid)"><a>$(ssname) loading...</a></p>
+    <div class='wff-boxes-spreadsheet-container' id="wff-boxes-spreadsheet-container-$(ssid)"></div>
 
 <div>

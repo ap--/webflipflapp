@@ -13,14 +13,14 @@ class FlyBoxError(Exception):
 
 class Box(dict):
     def __init__(self, ssid, wsid):
-        default = { 'ssid'          : ssid,
-                    'wsid'          : wsid,
-                    'calid'         : 'N/A',
-                    'flipped'       : 'N/A',
-                    'name'          : 'N/A',
-                    'labels'        : [],
-                    'flies'         : [],
-                    'mode'          : '' }
+        default = { 'ssid'    : ssid,
+                    'wsid'    : wsid,
+                    'name'    : 'N/A',
+                    'flipped' : 'N/A',
+                    'calid'   : 'N/A',
+                    'labels'  : {}, # dict idx : label
+                    'flies'   : [], # list of dicts 
+                  }
         super(Box, self).__init__(default)
 
 
@@ -59,19 +59,27 @@ def get_boxes_from_cellfeed(cellfeed):
         lastBox['_width'] = max(bx, lastBox.get('_width', 0))
         lastBox['_height'] = max(by, lastBox.get('_height', 0))
         if by == 0 and bx == 1: lastBox['name'] = v
-        if by == 0 and bx == 2: lastBox['flipped'] = v
-        if by == 0 and bx == 3: lastBox['calid'] = v
-        if by == 1: lastBox.setdefault('_labels', {})[bx] = v
-        if by >= 2: lastBox.setdefault('_elements', {})[(by,bx)] = v
+        if by == 0 and bx == 2: lastBox['flipped'] = v[9:] # ugly hack
+        if by == 0 and bx == 3: lastBox['calid'] = v[7:] # ugly hack
+        if by == 1: lastBox.setdefault('_labels', {})[bx] = v if v else '&nbsp;'
+        if by >= 2: lastBox.setdefault('_elements', {})[(by,bx)] = v if v else '&nbsp;'
     # get flies
     for b in BOXES:
         elements = b.pop('_elements', {}) 
         ylen, xlen = b.pop('_height', 0), b.pop('_width', 0)
         labels = b.pop('_labels', {})
-        for i in range(1, xlen+1):
-            b['labels'].append(labels.get(i, ''))
-        for j in range(2,ylen+1):
-            fly = {labels[i]:elements.get((j,i),'') for i in range(1, xlen+1) }
+        # get labels
+        for k in range(xlen):
+            ktmp = labels.get(k+1, None)
+            if ktmp == '':
+                ktmp = None
+            b['labels'][k] = ktmp
+        # get flies
+        for j in range(1,ylen):
+            fly = {}
+            for i in range(xlen):
+                if b['labels'][i] is not None:
+                    fly[b['labels'][i]] = elements.get((j+1,i+1), '&nbsp;')
             b['flies'].append(fly)
     
     return BOXES
