@@ -1,0 +1,134 @@
+$def with (tree, cl, ud, info, invalid, tab)
+
+$# set all statically loaded files for this template
+$var title: webFlipFlapp
+$var login_link: $info['login_url']
+$var auth_link: $info['auth_url']
+$var logout_link: $info['logout_url']
+$var user_email: $info['email']
+$var nickname: $info['nickname']
+$var has_cred: $info['has_cred']
+$var page: config
+
+$ SPREADSHEETS = ud.spreadsheet_name.split(',')
+$ CALENDARS = ud.calendar_name.split(',')
+$ SSID = ud.spreadsheet_id.split(',')
+$ CLID = ud.calendar_id.split(',')
+
+$ tab1active = "active" if tab == "tab1" else ""
+$ tab2active = "active" if tab == "tab2" else ""
+
+
+<div class="container">
+
+<!-- THE INVALID ERROR -->
+$if invalid:
+    <div class="alert alert-block alert-error">
+        <h4>Spreadsheet error!</h4>
+        The following selected spreadsheets seem to be invalid webFlipFlapp spreadsheets:
+        <ul>
+          $for iname in invalid:
+              <li>$iname</li>
+        </ul>
+    </div> 
+
+
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+  <ul class="nav nav-tabs">
+    <li class="$tab1active">
+      <a href="#tab1" data-toggle="tab">Spreadsheets</a>
+    </li>
+    <li class="$tab2active">
+      <a href="#tab2" data-toggle="tab">Calendars</a>
+    </li>
+  </ul>
+  <div class="tab-content">
+
+    <div class="tab-pane $tab1active" id="tab1">
+ 
+      <div class="row">
+        <div class="span12">      
+          <h3>Spreadsheet selection</h3>
+          <p>Choose one or several compatible spreadsheet files that are going to be displayed. If you want to create a new spreadsheet, please do that via the <a href="https://drive.google.com">Google Drive</a> web interface: Choose one of the offered template(s) (<a href='/static/flytemplate.ods'>flytemplate</a>), upload and import it to your Google Drive and rename it to whatever you like. Refresh this page after. Currently there's only one template.</p>
+        </div>
+      </div>
+
+      <form name='input' action="/config" method='get'>
+        <table class='table'>
+          <thead>
+            <tr class=''>
+              <th>Filename</th>
+              <th>Choice</th>
+            </tr>
+          </thead>
+          <tbody>
+            $ kfunc = lambda x: ('folder' not in x['mimeType'], x['title'])
+            $ ffunc = lambda x: x['mimeType'] == 'application/vnd.google-apps.spreadsheet'
+            $for name, node in tree.flatten_names(key=kfunc, filter=ffunc):
+                $ checked = 'checked' if node['id'] in SSID else ''
+                <tr>
+                  <td>$name</td>
+                  <td>
+                    <input type='checkbox' name='spreadsheets' value="$(node['id'])" $(checked)/>
+                  </td>
+                </tr>
+          </tbody>
+        </table>
+        <input type="hidden" name="tab" value="tab1">
+
+        <div class="form-actions">
+          <div class="pull-right">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn">Reset</button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+
+    <div class="tab-pane $tab2active" id="tab2">
+      <div class="row">
+        <div class="span12">
+          <h3>Calendar selection</h3>
+          <p>Choose one or several calendars that are going to be used for scheduling the boxes. If you want to create a new calendar, please do that via the <a href="https://www.google.com/calendar">Google Calendar</a> web interface. Refresh this page after.</p>
+        <div>
+      </div>
+    
+      <form name='input' action="/config" method='get'>
+        <table class='table'>
+          <thead>
+            <tr class=''>
+              <th>Calendar</th>
+              <th>Choice</th>
+            </tr>
+          </thead>
+          <tbody>
+            $for ccc in sorted(cl, key=(lambda x: x['summary'])):
+                $ checked = 'checked' if ccc['id'] in CLID else ''
+                <tr>
+                  <td>$(ccc['summary'])</td>
+                  <td>
+                    <input type='checkbox' name='calendars' value="$(ccc['id'])" $(checked)/>
+                  </td>
+                </tr>
+          </tbody>
+        </table>
+        <input type="hidden" name="tab" value="tab2">
+
+        <div class="form-actions">
+          <div class="pull-right">          
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn">Reset</button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</div>
+
+</div>
+

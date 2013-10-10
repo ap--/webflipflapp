@@ -10,33 +10,39 @@ $var logout_link: $info['logout_url']
 $var user_email: $info['email']
 $var nickname: $info['nickname']
 $var has_cred: $info['has_cred']
+$var page: index
 
-<div class='wff-infobox'>
-<p class='wff-infobox-heading'>Welcome to the webFlipFlapp!</p>
-<p class='wff-infobox-content'>WebFlipFlapp is an online tool for managing things that you store in boxes, and need your attention every now and then. It's powered by Google App Engine and uses Google Drive and Google Calendar as backends for managing all important information. It allows you to easily share the "databases" (spreadsheets) and "schedules" (calendars) with friends or colleagues or colleagues who are friends.</p>
+<div class="container">
+    
+<div class="hero-unit">
+  <h1>Welcome!</h1>
+  <p>WebFlipFlapp is an online tool for managing things that you store in boxes, and need your attention every now and then. It's powered by Google App Engine and uses Google Drive and Google Calendar as backends for managing all important information. It allows you to easily share the "databases" (spreadsheets) and "schedules" (calendars) with friends or colleagues or colleagues who are friends.</p>
+  <p>
+    <a class="btn btn-primary btn-large">Learn more</a>
+  </p>
 </div>
 
+<div class="alert alert-block alert-error">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4>Warning: lazy programmer!</h4>
+    The interactive web 3.0 online cloud based WebFlipFlapp Google App Engine App is currently in pre alpha development state. Use it only if your desperate. And make sure to not bug the developer.
+</div>
 
-<div class='wff-infobox'>
-<p class='wff-infobox-heading'>Getting started</p>
-<p class='wff-infobox-content'>The only thing that you need to start using the webFlipFlapp is a google email account. Your google login is then used to authenticate yourself with the webFliFlapp. If you already have one, just go to the spreadsheet selection page or the calendar selection page. After choosing a spreadsheet, you can view it's contents on the view boxes page.</p>
+<div class="row">
+  <div class="span12">
+  <h3>Quickstart</h3>
+  <p>The only thing that you need to start using the webFlipFlapp is a google email account. Your google login is then used to authenticate yourself with the webFlipFlapp. If you already have one, just sign in and configure everything via the <a href="/config">config-menu</a>. For further details go through the <a href="/help">help-page</a></p>
+  <h5>Enjoy!</h5>
+  </div>
 </div>
 
 
 $if info['has_cred']:
-    <div class='wff-infobox'>
     <p class='wff-infobox-ok-heading'>Access</p>
-    <p class='wff-infobox-ok-content'>Thank you. You granted WebFlipFlapp access to your Google Drive account and your Google Calendar account.</p>
-    </div>
 $else:
-    <div class='wff-infobox'>
     <p class='wff-infobox-warning-heading'>Access</p>
-    <p class='wff-infobox-warning-content'>You did not grant WebFlipFlapp access yet. To be of any use, please <a href="$(info['auth_url'])">grant access</a> to your Google Drive account and your Google Calendar account.</p>
-    </div>
 
 
-<div class='wff-infobox'>
-    <p class='wff-infobox-warning-heading'>Warning: lazy programmer</p>
-    <p class='wff-infobox-warning-content'>The interactive web 3.0 online cloud based WebFlipFlapp Google App Engine App is currently in pre alpha development state. Use it only if your desperate. And make sure to not bug the developer.</p>
+
 </div>
 

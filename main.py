@@ -124,7 +124,7 @@ def printerrors(prefix):
 # RequestHandlers
 #
 
-render = web.template.render('templates/', globals=template_globals, base='layout')
+render = web.template.render('templates/', globals=template_globals, base='bslayout')
 render_wo_layout = web.template.render('templates/', globals=template_globals)
 
 class Index(FakeWebapp2RequestHandler):
@@ -137,7 +137,7 @@ class Index(FakeWebapp2RequestHandler):
         return render.index(info)
 
 
-class Drive(FakeWebapp2RequestHandler):
+class Config(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1051.2: He\'s dead Jim')
     @decorator.oauth_required
     def GET(self):
@@ -145,23 +145,39 @@ class Drive(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
         http = decorator.http()
+        
+        # check spreadsheets
         tree = GoogleDrive.folder_structure(http=http, fields='items(iconLink)')
-        selections = web.input(selected=[]).selected
-        invalid = web.input(invalid=[]).invalid
-        if selections:
-            ids, names, invalid = [], [], []
-            for selected in selections:
-                name = tree.get_first_where(lambda k: k['id']==selected)['title']
-                cells = GoogleSpreadsheets.get_cells_from_first_worksheet(selected, http=http)
-                if cells and cells[0].content.text == 'WFF:FLYSTOCK':
-                    ids.append(selected)
-                    names.append(name)
-                else:
-                    invalid.append(selected)
-            if invalid:
-                raise web.seeother('/drive?'+'&'.join(['invalid=%s' % sid for sid in invalid]))
-            ud.set_spreadsheet(",".join(ids), ",".join(names))
-        return render.drive(tree, ud, invalid, info)
+        spreadsheets = web.input(spreadsheets=[]).spreadsheets
+
+        invalid = []
+        names = []
+        for selected in spreadsheets:
+            name = tree.get_first_where(lambda k: k['id']==selected)['title']
+            cells = GoogleSpreadsheets.get_cells_from_first_worksheet(selected, http=http)
+            if cells and cells[0].content.text == 'WFF:FLYSTOCK':
+                names.append(name)
+            else:
+                invalid.append(name)
+                
+        if (not invalid) and spreadsheets:
+            ud.set_spreadsheet(",".join(spreadsheets), ",".join(names))
+
+        # check calendars
+        cldr = GoogleCalendar.list_calendars(http=http, fields='items(id,summary)')
+        calendars = web.input(calendars=[]).calendars
+
+        names = []
+        for selected in calendars:
+            name = next(c['summary'] for c in cldr if c['id']==selected)
+            names.append(name)
+        
+        if calendars:
+            ud.set_calendar(",".join(calendars), ",".join(names))
+
+        # select tabs
+        tab = web.input(tab="tab1").tab
+        return render.config(tree, cldr, ud, info, invalid, tab)
 
 
 class Calendar(FakeWebapp2RequestHandler):
@@ -176,11 +192,6 @@ class Calendar(FakeWebapp2RequestHandler):
         selections = web.input(selected=[]).selected
         if selections:
             ids, names = [], []
-            for selected in selections:
-                name = next(c['summary'] for c in cldr if c['id']==selected)
-                ids.append(selected)
-                names.append(name)
-            ud.set_calendar(",".join(ids), ",".join(names))
         return render.calendar(cldr, ud, info)
 
 
@@ -285,7 +296,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
 appoauth = decorator.callback_application()
 
 urls = ( "/",            "Index",
-         "/drive",       "Drive",
+         "/config",      "Config",
          "/calendar",    "Calendar",
          "/boxes",       "Boxes",
          "/spreadsheet", "Spreadsheet",
