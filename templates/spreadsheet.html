@@ -1,50 +1,52 @@
-$def with (ssid, boxes)
+$def with (ssid, ssname, boxes, showflies, ud, info)
+
+$# set all statically loaded files for this template
+$var title: webFlipFlapp
+$var login_link: $info['login_url']
+$var auth_link: $info['auth_url']
+$var logout_link: $info['logout_url']
+$var user_email: $info['email']
+$var nickname: $info['nickname']
+$var has_cred: $info['has_cred']
+$var page: spreadsheets
+
 <html>
 <head>
   <title>WebFlipFlapp - Spreadsheet</title>
 </head>
 <body>
 
-<h1>Spreadsheet: $(ssid)</h1>
+<div class="container">
 
-$for num, box in enumerate(boxes):
-    $ _labels = box['labels']
-    $ M = max(_labels.keys())
-    $ labels = [_labels.get(i) for i in range(M) if _labels.get(i) is not None]
-    $ flies = box['flies']
-    <div class='wff-box' id='wff-box-$(ssid)-$(num)'>    
-      <div class='wff-box-meta' id='wff-box-meta-$(ssid)-$(num)'>
-          <h2><span class="wff-hide">Box: </span>
-              <span class="wff-box-meta-name">$(box['name'])</span></h2>
-        <ul>
-          <li>ssId: <span class="wff-box-meta-ssid">$(box['ssid'])</span></li>
-          <li>wsId: <span class="wff-box-meta-wsid">$(box['wsid'])</span></li>
-          <li>calId: <span class="wff-box-meta-calid">$(box['calid'])</span></li>
-          <li>flipped: <span class="wff-box-meta-flipped">$(box['flipped'])</span></li>
-        </ul>
-      </div>   
-      <div class="wff-box-data" id='wff-box-data-$(ssid)-$(num)'>
-        <table data-filter="#filter" class='footable table toggle-arrow-tiny'>
-          <thead>
-            <tr>
-              $for label in labels:
-                  $if label == 'Label':
-                      <th data-class='expand'>$(label)</th>
-                  $elif label == 'Short Identifier':
-                      <th>$(label)</th>
-                  $elif label in ['X', 'Y', 'C2a', 'C2b', 'C3a','C3b']:
-                      <th data-hide='all'>$(label)</th>
-                  $else:
-                      <th data-hide='phone'>$(label)</th>
-            </tr>
-          </thead>
-          <tbody>
-            $for fly in flies:
-                <tr>$:"".join(["<td>%s</td>" % fly.get(label, '') for label in labels])</tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <ul class="breadcrumb">
+    <li><strong>$(ssname)</strong> <span class="divider">|</span></li>
+    <li><a href="/labels?ssid=$(ssid)" target="_blank"><i class="icon-file-alt"></i> Labels</a> <span class="divider">|</span></li>
+    <li><a href="#"><i class="icon-calendar"></i> Config</a></li>
+  </ul>
 
+  <ul class="thumbnails">
+  $for num, box in enumerate(boxes):
+      $ name = box['name']
+      $ _labels = box['labels']
+      $ M = max(_labels.keys())
+      $ labels = [_labels.get(i) for i in range(M) if _labels.get(i) is not None]
+      $ flies = box['flies']
+      $ N = len(flies)
+      <li class="span3">
+        <div class="thumbnail">
+          <div class="page-header">
+            <h5>$name</h5>
+          </div>
+          <ul class="unstyled">
+            <li>nof $N</li>
+            <li>lmd $(box['flipped'])</li>
+          </ul>
+          <p>Box caption...</p>
+        </div>
+      </li>
+  
+  </ul>
+</div>    
+    
 </body>
 </html>

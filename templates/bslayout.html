@@ -3,6 +3,7 @@ $ active0 = 'class="active"' if content.page == 'config' else ''
 $ active1 = 'class="active"' if content.page == 'boxes' else ''
 $ active2 = 'class="active"' if content.page == 'flies' else ''
 $ active3 = 'class="active"' if content.page == 'help' else ''
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -14,6 +15,7 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
 
     <link href="//netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/united/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
     <link href="/static/css/footable.core.min.css" rel="stylesheet">
     <style>
       body {
@@ -50,10 +52,15 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/2.3.2/js/bootstrap.min.js"></script>
     <script src="/static/js/footable.min.js"></script>
+    $for jsfile in content.get('jsfiles','').split():
+        $if len(jsfile) != 0:
+            <script src="$jsfile"></script>
     <script type="text/javascript">
+        $$('.nav-tabs').button();
         $$(function () {
              $$('.table').footable();
         });
+        $:content.get('jscode', '')
     </script>
   </body>
 </html>

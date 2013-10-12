@@ -28,6 +28,8 @@ from google.appengine.api import users
 
 ### Flyflippingdstuff
 import flyboxes
+import labels
+import requests
 import datetime
 
 ### Debugging
@@ -180,20 +182,6 @@ class Config(FakeWebapp2RequestHandler):
         return render.config(tree, cldr, ud, info, invalid, tab)
 
 
-class Calendar(FakeWebapp2RequestHandler):
-    @printerrors('Stardate 1137.8: She\'s giving all she\'s got')
-    @decorator.oauth_required
-    def GET(self):
-        user = users.get_current_user()
-        ud = get_userdata(user)
-        info = get_header_info(user, decorator)
-        http = decorator.http()
-        cldr = GoogleCalendar.list_calendars(http=http, fields='items(id,summary)')
-        selections = web.input(selected=[]).selected
-        if selections:
-            ids, names = [], []
-        return render.calendar(cldr, ud, info)
-
 
 class Boxes(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1407.1: You green blooded bastard')
@@ -203,13 +191,15 @@ class Boxes(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
         http = decorator.http()
-        # data = web.input(flipped=None, add=None)
 
         # GET SELECTED SPREADSHEETS:
-        #SSCOLL = {}
         if len(ud.spreadsheet_id.split(',')[0]) == 0:
-            web.seeother('/drive')
+            web.seeother('/config')
+        
+        return render.boxes(ud, info)
 
+        # data = web.input(flipped=None, add=None)
+        #SSCOLL = {}
         #for ssid in ud.spreadsheet_id.split(','):
         #    cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
         #    # If a box got flipped
@@ -243,7 +233,6 @@ class Boxes(FakeWebapp2RequestHandler):
         #for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
         #    flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
 
-        return render.boxes(ud, info)
 
 
 class Spreadsheet(FakeWebapp2RequestHandler):
@@ -251,12 +240,17 @@ class Spreadsheet(FakeWebapp2RequestHandler):
     @decorator.oauth_required
     def GET(self):
         http = decorator.http()
-        data = web.input(ssid=None)
-        if data.ssid is None:
+        data = web.input(ssid=None, ssname=None)
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        info = get_header_info(user, decorator)
+        if (data.ssid is None):
             raise Exception("no ssid query parameter")
+        if (data.ssname is None):
+            raise Exception("no ssname query parameter")
         cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
         boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
-        return render_wo_layout.spreadsheet(data.ssid, boxes)
+        return render.spreadsheet(data.ssid, data.ssname, boxes, True, ud, info)
 
 
 
@@ -264,23 +258,20 @@ class PdfLabels(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1561.8: Humans are highly illogical')
     @decorator.oauth_required
     def GET(self):
-        data = web.input(box=[])
-        store = {}
-        for ssb in data.box:
-            ssid, boxname = ssb.split('/')
-            store[ssid] = store.get(ssid, []) + [boxname]
-
-        Flies = []
-        for ssid, boxnames in store.iteritems():
-            cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-            boxes = flyboxes.get_boxes_from_cellfeed(cf)
-            
-            for boxname in boxnames:
-                Flies.extend(flyboxes.get_flies_from_box(ssid, boxname, boxes))
+        try:
+            ssid = web.input().ssid
+        except:
+            return "No valid input"
+        http = decorator.http()
+        cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+        boxes = flyboxes.get_boxes_from_cellfeed(cf)
+        flies = []
+        for box in boxes:
+            flies.extend(box['flies'])
         
-        URL, OPTIONS = flyboxes.pdflink_from_flies(Flies)
+        URL, OPTIONS = labels.pdflink(flies)
         
-        r = requests.put(URL, data=OPTIONS)
+        r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
         
         web.header('Content-Type','application/pdf')
@@ -300,6 +291,7 @@ urls = ( "/",            "Index",
          "/calendar",    "Calendar",
          "/boxes",       "Boxes",
          "/spreadsheet", "Spreadsheet",
+         "/labels",      "PdfLabels"
        )
 
 appgae = web.application(urls, globals()).wsgifunc()

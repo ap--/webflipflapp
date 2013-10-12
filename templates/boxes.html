@@ -1,8 +1,6 @@
 $def with (ud, info)
 
 $# set all statically loaded files for this template
-$var cssfiles: //ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css /static/css/footable.core.min.css /static/css/footable.wff.min.css /static/css/wff.min.css
-$var jsfiles: //ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js //ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js /static/js/footable.min.js /static/js/footable.filter.js /static/js/wff.js
 $var title: webFlipFlapp
 $var login_link: $info['login_url']
 $var auth_link: $info['auth_url']
@@ -10,31 +8,29 @@ $var logout_link: $info['logout_url']
 $var user_email: $info['email']
 $var nickname: $info['nickname']
 $var has_cred: $info['has_cred']
+$var page: boxes
 
 $ SPREADSHEETS = ud.spreadsheet_name.split(',')
 $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
 
-<script>
-    $for ssid, ssname in zip(SSID,SPREADSHEETS):
-        loadSpreadsheet("$ssid", "$ssname");
-</script>
+$var jsfiles: /static/js/wff.js
+$var jscode: $:"\n".join(["loadSpreadsheet('%s', '%s');" % ss for ss in zip(SSID,SPREADSHEETS)])
 
+<div class="container">
 
-<div class='wff-infobox'>
-    <p class='wff-infobox-heading'>Boxes</p>
-    <p class='wff-infobox-content'>If you want to modify some entries in your Boxes, please do that via the <a href="https://drive.google.com">Google Drive</a> web interface. Refresh this page after.</p>
-</div>
+<h3>Your Stocklists</h3>
 
-<div class='wff-infobox'>
-    <p class='wff-infobox-heading'>Search</p>
-    <p class='wff-infobox-content'>filter all items for <input id="filter" type="text"/>.</p>
-</div>
-
-<div class="wff-all-boxes-expand">
 $for ssid, ssname in zip(SSID,SPREADSHEETS):
-    <p class='wff-boxes-spreadsheet-heading' id="wff-boxes-spreadsheet-heading-$(ssid)"><a>$(ssname) loading...</a></p>
-    <div class='wff-boxes-spreadsheet-container' id="wff-boxes-spreadsheet-container-$(ssid)"></div>
+    <div id="wff-boxes-spreadsheet-heading-$(ssid)">
+      <ul class="breadcrumb">
+        <li><strong>$(ssname)</strong> <span class="divider">|</span></li>
+        <li>loading spreadsheet <i class="icon-spinner icon-spin"></i></li>
+      </ul>
+    </div> 
 
-<div>
+    <div id="wff-boxes-spreadsheet-container-$(ssid)"></div>
+
+</div>
+

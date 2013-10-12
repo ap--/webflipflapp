@@ -46,7 +46,7 @@ def get_boxes_from_cellfeed(cellfeed):
         if y < 3:
             continue
         # ignore everything after a #WFF-IGNORE
-        if x == 1 and v == "#WFF-IGNORE":
+        if x == 1 and v == "WFF:IGNORE":
             break
         # seperate boxes
         if y - y_old < 2:
