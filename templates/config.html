@@ -18,6 +18,10 @@ $ CLID = ud.calendar_id.split(',')
 $ tab1active = "active" if tab == "tab1" else ""
 $ tab2active = "active" if tab == "tab2" else ""
 
+$ test = """$('#savess').click(function() {$(this).button('loading');});
+$           $('#savecl').click(function() {$(this).button('loading');});
+$           """
+$var jscode: $:test
 
 <div class="container">
 
@@ -54,7 +58,7 @@ $if invalid:
       </div>
 
       <form name='input' action="/config" method='get'>
-        <table class='table'>
+        <table class='footable table table-condensed table-hover'>
           <thead>
             <tr class=''>
               <th>Filename</th>
@@ -78,8 +82,8 @@ $if invalid:
 
         <div class="form-actions">
           <div class="pull-right">
-            <button type="submit" class="btn btn-primary">Save changes</button>
-            <button type="button" class="btn">Reset</button>
+            <button type="submit" class="btn btn-primary" id="savess" data-loading-text="Saving <i class='icon-spinner icon-spin'></i>">Save changes</button>
+            <button type="button" class="btn" id="resetss">Reset</button>
           </div>
         </div>
 
@@ -96,7 +100,7 @@ $if invalid:
       </div>
     
       <form name='input' action="/config" method='get'>
-        <table class='table'>
+        <table class='footable table table-condensed table-hover'>
           <thead>
             <tr class=''>
               <th>Calendar</th>
@@ -118,8 +122,8 @@ $if invalid:
 
         <div class="form-actions">
           <div class="pull-right">          
-            <button type="submit" class="btn btn-primary">Save changes</button>
-            <button type="button" class="btn">Reset</button>
+            <button type="submit" class="btn btn-primary" id="savecl" data-loading-text="Saving <i class='icon-spinner icon-spin'></i>" data-toggle="button">Save changes</button>
+            <button type="button" class="btn" id="resetcl">Reset</button>
           </div>
         </div>
 
