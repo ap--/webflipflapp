@@ -20,7 +20,9 @@ $var jscode: $:"\n".join(["loadSpreadsheet('%s', '%s');" % ss for ss in zip(SSID
 
 <div class="container">
 
-<h3>Your Stocklists</h3>
+<h3>Boxes in your stocklists</h3>
+<p>View and manage all your Boxes on this page. You can print labels for individual Boxes, or all boxes in a stocklist. To search for flies, goto the <a href="/flies">Flies-page</a>.</p>
+<p>&nbsp;</p>
 
 $for ssid, ssname in zip(SSID,SPREADSHEETS):
     <div id="wff-boxes-spreadsheet-heading-$(ssid)">
