@@ -13,14 +13,19 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
     <meta name="description" content="spreadsheet sharing for flystocks">
     <meta name="author" content="Andreas Poehlmann">
 
-    <link href="//netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/united/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
     <link href="/static/css/footable.core.min.css" rel="stylesheet">
     <style>
       body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
+        padding-top: 60px;
+        padding-bottom: 40px;
+        }
+        @media (max-width: 979px) {
+          body {
+            padding-top: 0px;
+          }
+        }
     </style>    
   </head>
 
@@ -28,21 +33,27 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
           <a class="brand" href="/">WebFlipFlapp</a>
+
+          <div class="nav-collapse collapse">
           <ul class="nav">
               <li $:active0 ><a href="/config"><i class="icon-cogs"></i> Config</a></li>
               <li $:active1 ><a href="/boxes"><i class="icon-archive"></i> Boxes</a></li>
               <li $:active2 ><a href="/flies"><i class="icon-bug"></i> Flies</a></li>
               <li $:active3 ><a href="/help"><i class="icon-question-sign"></i> Help</a></li>
           </ul>
-          <form class="navbar-form pull-right">
+          <ul class="nav pull-right">
               $if content.has_cred:
-                  <button type="submit" class="btn">Sign out</button>
+                  <li><a href="$:content.logout_link" title="$content.user_email">Sign out</a></li>
               $else:
-                  <input class="span2" type="text" placeholder="Email">
-                  <input class="span2" type="password" placeholder="Password">
-                  <button type="submit" class="btn">Sign in</button>
-          </form>
+                  <li><a href="$:content.login_link">Sign in</a></li>
+          </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -59,6 +70,7 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
             <script src="$jsfile"></script>
     <script type="text/javascript">
         $$('.nav-tabs').button();
+        $$(".collapse").collapse()
         $$(function () {
              $$('.table').footable();
         });
