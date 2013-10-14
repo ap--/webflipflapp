@@ -114,10 +114,14 @@ def printerrors(prefix):
                 return f(*args, **kwargs)
             except Exception as e:
                 sp = '%s\n%s\n' % (prefix, '~'*len(prefix))
-                se = 'ERROR: %s\n' % str(e)
-                st = traceback.format_exc().strip().replace('\n', '\n> ')
-                web.header('Content-Type', 'text/plain')
-                ret = '%s\n%s\n%s' % (sp, se, st)
+                if False:
+                    se = 'ERROR: %s\n' % str(e)
+                    st = traceback.format_exc().strip().replace('\n', '\n> ')
+                    web.header('Content-Type', 'text/plain')
+                    ret = '%s\n%s\n%s' % (sp, se, st)
+                else:
+                    web.header('Content-Type', 'text/plain')
+                    ret = '%s\n%s\n' % (sp, "An error occurred. Your best option is to reboot your computer.")
                 return ret
         return mydecorator
     return thedecorator
