@@ -104,7 +104,11 @@ def get_tex(flies):
 def pdflink(flies, out=None, dpi=600):
     URL = 'http://sciencesoft.at/image/latexurl/%s' % out
     tex = get_tex(flies)
-    OPTIONS = {'src' : unicode(tex, 'utf-8'),
+    try:
+        tex = unicode(tex, 'utf-8')
+    except:
+        pass
+    OPTIONS = {'src' : tex,
                'dev' : 'pdfwrite',
                'papersize' : 'a4',
                'dpi' : dpi,
