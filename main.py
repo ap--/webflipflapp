@@ -31,6 +31,7 @@ import flyboxes
 import labels
 import requests
 import datetime
+import json
 
 ### Debugging
 import pprint
@@ -259,23 +260,73 @@ class PdfLabels(FakeWebapp2RequestHandler):
     @decorator.oauth_required
     def GET(self):
         try:
-            ssid = web.input().ssid
-        except:
-            return "No valid input"
-        http = decorator.http()
-        cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-        boxes = flyboxes.get_boxes_from_cellfeed(cf)
-        flies = []
-        for box in boxes:
-            flies.extend(box['flies'])
+            ssid = web.input().ssid 
         
-        URL, OPTIONS = labels.pdflink(flies)
+            http = decorator.http()
+            cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            boxes = flyboxes.get_boxes_from_cellfeed(cf)
+            flies = []
+            for box in boxes:
+                flies.extend(box['flies'])
+        
+            URL, OPTIONS = labels.pdflink(flies)
+        except:            
+            pass
+
+        try:
+            tabledata = web.input().tabledata
+        
+            web.header('Content-Type','text/plain')
+            return tabledata
+        except:
+            pass
         
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
         
         web.header('Content-Type','application/pdf')
         return r.content
+
+    @printerrors('Stardate 1561.8: Humans are highly illogical')
+    def POST(self):
+        tabledata = web.input().tabledata
+        flies = json.loads(tabledata)
+        URL, OPTIONS = labels.pdflink(flies)
+
+        r = requests.post(URL, data=OPTIONS)
+        r.raise_for_status()
+        
+        web.header('Content-Type','application/pdf')
+        return r.content
+
+
+class FlyData(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1820.2: Space, the final frontier')
+    @decorator.oauth_required
+    def GET(self):
+        http = decorator.http()
+        data = web.input(ssid=None, ssname=None)
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        info = get_header_info(user, decorator)
+        if (data.ssid is None):
+            raise Exception("no ssid query parameter")
+        if (data.ssname is None):
+            raise Exception("no ssname query parameter")
+        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
+        boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        return render.flydata(data.ssid, data.ssname, boxes, info)
+
+
+class Flies(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1820.2: Space, the final frontier')
+    @decorator.oauth_required
+    def GET(self):
+        http = decorator.http()
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        info = get_header_info(user, decorator)
+        return render.flies(ud, info)
 
 
 
@@ -288,10 +339,11 @@ appoauth = decorator.callback_application()
 
 urls = ( "/",            "Index",
          "/config",      "Config",
-         "/calendar",    "Calendar",
          "/boxes",       "Boxes",
          "/spreadsheet", "Spreadsheet",
-         "/labels",      "PdfLabels"
+         "/labels",      "PdfLabels",
+         "/flies",       "Flies",
+         "/flydata",     "FlyData",
        )
 
 appgae = web.application(urls, globals()).wsgifunc()

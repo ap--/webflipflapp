@@ -9,7 +9,15 @@ function loadSpreadsheet( ssid, ssname ) {
     });
 }
 
-
+function loadFlies( ssid, ssname ) {
+    $.get('/flydata', { 'ssid': ssid, 'ssname': ssname }, function(data) {
+        var html = jQuery('<div>').html(data);
+        var flies = html.find('tbody tr');
+        $('#wff-boxes-flies').append(flies);
+        $('.table').trigger('footable_redraw');
+        $('#wff-box-loader-' + ssid).removeClass('label-info').addClass('label-success').html(ssname + '<i class="icon-ok"></i>');
+    });
+}
 
 function generateHeader( ssid, boxname, N ) {
     var Header = "";
