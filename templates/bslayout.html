@@ -52,6 +52,8 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/2.3.2/js/bootstrap.min.js"></script>
     <script src="/static/js/footable.min.js"></script>
+    <script src="/static/js/footable.filter.min.js"></script>
+    <script src="/static/js/footable.sort.min.js"></script>
     $for jsfile in content.get('jsfiles','').split():
         $if len(jsfile) != 0:
             <script src="$jsfile"></script>
