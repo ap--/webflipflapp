@@ -20,7 +20,7 @@ $var page: spreadsheets
 
   <ul class="breadcrumb">
     <li><strong>$(ssname)</strong> <span class="divider">|</span></li>
-    <li><a href="/labels?ssid=$(ssid)" target="_blank"><i class="icon-file-alt"></i> Labels</a> <span class="divider">|</span></li>
+    <li><a href="/labels?ssid=$(ssid)" target="_blank" title="generate labels for all boxes in stocklist"><i class="icon-file-alt"></i> Labels</a> <span class="divider">|</span></li>
     <li><a href="#"><i class="icon-calendar"></i> Config</a></li>
   </ul>
 
@@ -32,16 +32,30 @@ $var page: spreadsheets
       $ labels = [_labels.get(i) for i in range(M) if _labels.get(i) is not None]
       $ flies = box['flies']
       $ N = len(flies)
+      $ urlname = box['urlname']
       <li class="span3">
         <div class="thumbnail">
-          <div class="page-header">
-            <h5>$name</h5>
-          </div>
-          <ul class="unstyled">
-            <li>nof $N</li>
-            <li>lmd $(box['flipped'])</li>
-          </ul>
-          <p>Box caption...</p>
+                <table class='table table-condensed'>
+                    <thead>
+                        <tr>
+                            <th colspan=2>
+                                <span><strong class="pull-left">$name</strong>
+                                    <a class="pull-right" href="/labels?ssid=$(ssid)&box=$(urlname)" target="_blank" title="generate labels for this box"><i class="icon-file-alt"></i></a></span>
+                            </th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        <tr>
+                            <td><em># flies</em></td>
+                            <td><div class="text-center"><span class="badge">$N</span></div></td>  
+                        </tr>
+                        <tr>
+                            <td><em>flipped:</em></td>
+                            <td><div class="text-center">$(box['flipped'])</div></td>
+                        </tr>
+                    </tbody>
+          </table>
         </div>
       </li>
   

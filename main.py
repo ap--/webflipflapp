@@ -80,13 +80,13 @@ def get_userdata(user):
         userdata.put()
     return userdata
 
-def get_header_info(user, deco):
+def get_header_info(user,deco):
     return {'has_cred' : deco.has_credentials(),
-            'auth_url' : deco.authorize_url(),
-            'login_url' : users.create_login_url('/'),
-            'logout_url' : users.create_logout_url('/'),
-            'nickname' : user.nickname(),
-            'email' : user.email() }
+                'auth_url' : deco.authorize_url(),
+                'login_url' : users.create_login_url('/'),
+                'logout_url' : users.create_logout_url('/'),
+                'nickname' : user.nickname(),
+                'email' : user.email() }
 
 
 #-------------------------------------------------
@@ -135,7 +135,6 @@ class Index(FakeWebapp2RequestHandler):
     @decorator.oauth_aware
     def GET(self):
         user = users.get_current_user()
-        ud = get_userdata(user)
         info = get_header_info(user, decorator)
         return render.index(info)
 
@@ -259,28 +258,20 @@ class PdfLabels(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1561.8: Humans are highly illogical')
     @decorator.oauth_required
     def GET(self):
-        try:
-            ssid = web.input().ssid 
-        
-            http = decorator.http()
-            cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-            boxes = flyboxes.get_boxes_from_cellfeed(cf)
-            flies = []
-            for box in boxes:
-                flies.extend(box['flies'])
-        
-            URL, OPTIONS = labels.pdflink(flies)
-        except:            
-            pass
+        ssid = web.input().ssid 
+        bn = web.input(box=None).box
 
-        try:
-            tabledata = web.input().tabledata
-        
-            web.header('Content-Type','text/plain')
-            return tabledata
-        except:
-            pass
-        
+        http = decorator.http()
+        cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+        boxes = flyboxes.get_boxes_from_cellfeed(cf)
+        flies = []
+        for box in boxes:
+            if (bn is not None) and box['name'] != bn:
+                continue
+            flies.extend(box['flies'])
+
+        URL, OPTIONS = labels.pdflink(flies)
+
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
         
@@ -328,7 +319,14 @@ class Flies(FakeWebapp2RequestHandler):
         info = get_header_info(user, decorator)
         return render.flies(ud, info)
 
-
+class Help(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1820.2: Space, the final frontier')
+    @decorator.oauth_aware
+    def GET(self):
+        http = decorator.http()
+        user = users.get_current_user()
+        info = get_header_info(user, decorator)
+        return render.help(info)
 
 """
     The oauth2callback is done with the google-webapp stuff thats
@@ -344,6 +342,7 @@ urls = ( "/",            "Index",
          "/labels",      "PdfLabels",
          "/flies",       "Flies",
          "/flydata",     "FlyData",
+         "/help",        "Help",
        )
 
 appgae = web.application(urls, globals()).wsgifunc()

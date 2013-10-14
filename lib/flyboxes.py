@@ -4,7 +4,7 @@ import datetime
 import re
 import random
 import string
-
+import urllib
 
 
 class FlyBoxError(Exception):
@@ -16,6 +16,7 @@ class Box(dict):
         default = { 'ssid'    : ssid,
                     'wsid'    : wsid,
                     'name'    : 'N/A',
+                    'urlname' : 'N/A',
                     'flipped' : 'N/A',
                     'calid'   : 'N/A',
                     'labels'  : {}, # dict idx : label
@@ -58,7 +59,9 @@ def get_boxes_from_cellfeed(cellfeed):
         lastBox = BOXES[-1]
         lastBox['_width'] = max(bx, lastBox.get('_width', 0))
         lastBox['_height'] = max(by, lastBox.get('_height', 0))
-        if by == 0 and bx == 1: lastBox['name'] = v
+        if by == 0 and bx == 1: 
+            lastBox['name'] = v
+            lastBox['urlname'] = urllib.quote_plus(v)
         if by == 0 and bx == 2: lastBox['flipped'] = v[9:] # ugly hack
         if by == 0 and bx == 3: lastBox['calid'] = v[7:] # ugly hack
         if by == 1: lastBox.setdefault('_labels', {})[bx] = v if v else '&nbsp;'
