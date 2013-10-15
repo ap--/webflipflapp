@@ -1,0 +1,66 @@
+$def with (ssid, ssname, boxes, info)
+
+$# set all statically loaded files for this template
+$var title: webFlipFlapp
+$var login_link: $info['login_url']
+$var auth_link: $info['auth_url']
+$var logout_link: $info['logout_url']
+$var user_email: $info['email']
+$var nickname: $info['nickname']
+$var has_cred: $info['has_cred']
+$var page: spreadsheets
+
+<html>
+<head>
+  <title>WebFlipFlapp - Spreadsheet</title>
+</head>
+<body>
+
+<div class="container">
+
+  <table class="footable table" data-filter="#filter" data-filter-text-only="true">
+    <thead>
+      <tr>
+        <th data-toggle="true">Label</th>
+        <th>Short Identifier</th>
+        <th data-hide="phone">Genotype</th>
+        <th data-hide="all">X</th>
+        <th data-hide="all">Y</th>
+        <th data-hide="all">C2a</th>
+        <th data-hide="all">C2b</th>
+        <th data-hide="all">C3a</th>
+        <th data-hide="all">C3b</th>
+        <th data-hide="all">Extra Info</th>
+        <th data-hide="all">Mod</th>
+        <th data-hide="phone">Box</th>
+        <th data-hide="phone">Stocklist</th>
+      </tr>
+    </thead>
+    <tbody id="wff-boxes-flies">
+      $for num, box in enumerate(boxes):
+          $ name = box['name']
+          $ _labels = box['labels']
+          $ flies = box['flies']
+          $for fly in flies:
+              <tr>
+                <td>$:(fly['Label'])</td>
+                <td>$:(fly['Short Identifier'])</td>
+                <td>$:(fly['Genotype'])</td>
+                <td>$:(fly['X'])</td>
+                <td>$:(fly['Y'])</td>
+                <td>$:(fly['C2a'])</td>
+                <td>$:(fly['C2b'])</td>
+                <td>$:(fly['C3a'])</td>
+                <td>$:(fly['C3b'])</td>
+                <td>$:(fly['Extra info'])</td>
+                <td>$:(fly['Mod'])</td>
+                <td>$name</td>
+                <td data-value="$ssid">$ssname</td>
+              </tr>
+    </tbody>
+  </table>
+
+</div>    
+    
+</body>
+</html>
