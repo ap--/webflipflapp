@@ -191,6 +191,7 @@ class Boxes(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1407.1: You green blooded bastard')
     @decorator.oauth_required
     def GET(self):
+        web.header('Cache-control', 'must-revalidate')
         user = users.get_current_user()
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
@@ -317,6 +318,7 @@ class Flies(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1820.2: Space, the final frontier')
     @decorator.oauth_required
     def GET(self):
+        web.header('Cache-control', 'must-revalidate')
         http = decorator.http()
         user = users.get_current_user()
         ud = get_userdata(user)
