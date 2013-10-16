@@ -28,6 +28,14 @@ function loadFlies( ssid, ssname ) {
     });
 }
 
+function workaroundFlies( ssid ) {
+    var flies = $('#wff-flies-workaround-' + ssid).contents().find('tbody tr');
+    $('#wff-boxes-flies').append(flies);
+    $('.table').trigger('footable_redraw');
+    $('#wff-box-loader-' + ssid).removeClass('label-info').addClass('label-success')
+    $('#wff-box-loader-' + ssid + ' i').removeClass('icon-spinner icon-spin').addClass('icon-ok');
+}
+
 function generateHeader( ssid, boxname, N ) {
     var Header = "";
     Header += "<div class='wff-boxes-calendar-container wff-minimized'>";

@@ -51,10 +51,10 @@ $               $('#myinput').val(JSON.stringify(flies));
 $               return true;
 $           }
 $           """
-$ test2 = "\n".join(["loadFlies('%s', '%s');" % ss for ss in zip(SSID,SPREADSHEETS)])
-$ test = test1 + "\n" + test2
+$# test2 = "\n".join(["loadFlies('%s', '%s');" % ss for ss in zip(SSID,SPREADSHEETS)])
+$# test = test1 + "\n" + test2
 $var jsfiles: /static/js/wff.js
-$var jscode: $:test
+$var jscode: $:test1
 
 
 <div class="container">
@@ -64,6 +64,7 @@ $var jscode: $:test
   <p>Loading: 
     $for ssid, ssname in zip(SSID, SPREADSHEETS):
         <span id="wff-box-loader-$ssid" class="label label-warning">$ssname <i class="icon-spinner icon-spin"></i></span>
+        <iframe id="wff-flies-workaround-$(ssid)" style="display:none" src="/flydata?ssid=$(ssid    )&ssname=$(ssname)" onload="workaroundFlies('$(ssid)')"></iframe>
   </p>
 
 
