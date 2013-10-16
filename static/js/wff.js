@@ -9,6 +9,15 @@ function loadSpreadsheet( ssid, ssname ) {
     });
 }
 
+function workaround( ssid ) {
+    var myframe = $('#wff-boxes-workaround-' + ssid).contents();
+    var header = myframe.find('.breadcrumb');
+    var boxes = myframe.find('.thumbnails');
+    $('#wff-boxes-spreadsheet-heading-' + ssid + " ul" ).replaceWith(header);
+    $('#wff-boxes-spreadsheet-container-' + ssid).append(boxes);
+}
+
+
 function loadFlies( ssid, ssname ) {
     $.get('/flydata', { 'ssid': ssid, 'ssname': ssname }, function(data) {
         var html = jQuery('<div>').html(data);

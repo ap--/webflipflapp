@@ -16,7 +16,7 @@ $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
 
 $var jsfiles: /static/js/wff.js
-$var jscode: $:"\n".join(["loadSpreadsheet('%s', '%s');" % ss for ss in zip(SSID,SPREADSHEETS)])
+$var jscode: 
 
 <div class="container">
 
@@ -33,6 +33,7 @@ $for ssid, ssname in zip(SSID,SPREADSHEETS):
     </div> 
 
     <div id="wff-boxes-spreadsheet-container-$(ssid)"></div>
+    <iframe id="wff-boxes-workaround-$(ssid)" style="display:none" src="/spreadsheet?ssid=$(ssid)&ssname=$(ssname)" onload="workaround('$(ssid)')"></iframe>
 
 </div>
 
