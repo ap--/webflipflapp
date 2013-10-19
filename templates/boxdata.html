@@ -1,0 +1,50 @@
+$def with (status, ssid, ssname, boxes, statusText)
+$#
+$# displays all flies in a spreadsheet
+$#
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>WFF - Spreadsheet - $(ssname)</title></head>
+<body>
+$if status == 'OK':
+    <div class="container">
+    <ul class="breadcrumb">
+    <li><strong>$(ssname)</strong></li>
+    <li><span class="divider">|</span></li>
+    <li><a class="btn btn-link" href="/labels?ssid=$(ssid)" target="_blank" title="generate labels for all boxes in stocklist"><i class="icon-file-alt"></i> Labels</a></li>
+    <li><span class="divider">|</span></li>
+    <li class="muted"><span title="the calendar functionality is currently disabled"><i class="icon-calendar"></i> Config</span></li>
+    </ul>
+    <ul class="thumbnails">
+    $for box in boxes:
+        $ N = len(box['flies'])
+        $ urlname = box['urlname']
+        <li class="span3"><div class="thumbnail"><table class='table table-condensed'>
+        <thead><tr><th colspan=2><span><strong class="pull-left">$(box['name'])</strong>
+        <a class="pull-right" href="/labels?ssid=$(ssid)&box=$(urlname)" target="_blank" title="generate labels for this box"><i class="icon-file-alt"></i></a></span>
+        </th></tr></thead>               
+        <tbody><tr>
+        <td><em># flies</em></td>
+        <td><div class="text-center"><span class="badge">$N</span></div></td>  
+        </tr><tr>
+        <td><em>flipped:</em></td>
+        <td><div class="text-center">$(box['flipped'])</div></td>
+        </tr></tbody>
+        </table></div></li>  
+    </ul></div><script>
+    window.onload = function() { parent.wffBoxesLoaded('$ssid'); };
+    </script>
+$elif status == 'ERROR':
+    <h1>Error:</h1>
+    <p>$statusText</p>
+    <script>
+    window.onload = function() { parent.wffBoxesError('$ssid', '$:statusText'); };
+    </script>
+$else:
+    <h1>ImpossibleError:</h1>
+    <p>This is not supposed to happen! Run!</p>
+    <script>
+    window.onload = function() { parent.wffImpossibleError(); };
+    </script>
+$#
+</body>
+</html>

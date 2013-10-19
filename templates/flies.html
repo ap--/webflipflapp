@@ -1,5 +1,4 @@
 $def with (ud, info)
-
 $# set all statically loaded files for this template
 $var title: webFlipFlapp
 $var login_link: $info['login_url']
@@ -9,67 +8,22 @@ $var user_email: $info['email']
 $var nickname: $info['nickname']
 $var has_cred: $info['has_cred']
 $var page: flies
-
 $ SPREADSHEETS = ud.spreadsheet_name.split(',')
 $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
-
-$ test1 = """$(function () {
-$               $('table').footable().bind('footable_filtering', function (e) {
-$                       var selected = $('.filter-status').find(':selected').text();
-$                       if (selected && selected.length > 0) {
-$                           e.filter += (e.filter && e.filter.length > 0) ? ' ' + selected : selected;
-$                           e.clear = !e.filter;
-$                       };
-$                   });
-$               $('.clear-filter').click(function (e) {
-$                       e.preventDefault();
-$                       $('.filter-status').val('');
-$                       $('table.demo').trigger('footable_clear_filter');
-$                   });
-$               $('.filter-status').change(function (e) {
-$                       e.preventDefault();
-$                       $('table').trigger('footable_filter', {filter: $('#filter').val()});
-$                   });
-$               $('.generate-labels').click(function (e) {
-$                       e.preventDefault();
-$                   });
-$           });
-$           function getfilteredData() {
-$               var flies = [];
-$               var data = $("tbody tr").filter(function() { return $(this).css("display") == "table-row" });
-$               for (var i=0; i<data.length;i++) {
-$                   var row = data.eq(i).find('td');
-$                   var fly = {};
-$                   fly['Label'] = row.eq(0).text();
-$                   fly['Short Identifier'] = row.eq(1).text();
-$                   fly['Genotype'] = row.eq(2).text();
-$                   flies.push(fly);
-$               }
-$               $('#myinput').val(JSON.stringify(flies));
-$               return true;
-$           }
-$           """
-$# test2 = "\n".join(["loadFlies('%s', '%s');" % ss for ss in zip(SSID,SPREADSHEETS)])
-$# test = test1 + "\n" + test2
 $var jsfiles: /static/js/wff.js
-$var jscode: $:test1
-
-
+$var jscode: $:"wffFliesSetup();"
 <div class="container">
-
   <h3>Flies in your Stocklists</h3>
-
   <p>Loading: 
     $for ssid, ssname in zip(SSID, SPREADSHEETS):
         <span id="wff-box-loader-$ssid" class="label label-warning">$ssname <i class="icon-spinner icon-spin"></i></span>
-        <iframe id="wff-flies-workaround-$(ssid)" style="display:none" src="/flydata?ssid=$(ssid    )&ssname=$(ssname)" onload="workaroundFlies('$(ssid)')"></iframe>
+        <iframe id="wff-flies-workaround-$(ssid)" style="display:none" src="/flydata?ssid=$(ssid    )&ssname=$(ssname)"></iframe>
   </p>
-
-
-  <form name="myform" id="myform" action='/labels' onsubmit="return getfilteredData()" method="post" target="_blank" class="form-inline">
-    <input type="hidden" id="myinput" name="tabledata" value="HAHA" />
+  <div id="wff-box-error"></div>
+  <form class="form-inline" action='/labels' onsubmit="wffFliesGetFilteredData()" method="post" target="_blank">
+    <input type="hidden" id="wff-flies-form-data" name="tabledata" value="" />
     <fieldset>
       <legend>Search</legend>
       <label>Match:</label>
@@ -105,8 +59,4 @@ $var jscode: $:test1
     <tbody id="wff-boxes-flies">
     </tbody>
   </table>
-
 </div>
-
-</body>
-</html>

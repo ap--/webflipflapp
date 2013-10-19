@@ -11,7 +11,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib_third_party'))
 import web
 from oauth2client.appengine import OAuth2DecoratorFromClientSecrets
 from oauth2client_webpy_bridge import FakeWebapp2RequestHandler
-import json; template_globals = {"json_encode": json.dumps}
 
 
 ### Google API interfaces
@@ -121,7 +120,7 @@ def printerrors(prefix):
                     ret = '%s\n%s\n%s' % (sp, se, st)
                 else:
                     web.header('Content-Type', 'text/plain')
-                    ret = '%s\n%s\n' % (sp, "An error occurred. Your best option is to reboot your computer.")
+                    ret = '%s\n%s\n' % (sp, "An error occurred. Your best option is to reboot your computer. (if your tried to print labels, try generating fewer at once.)")
                 return ret
         return mydecorator
     return thedecorator
@@ -131,8 +130,8 @@ def printerrors(prefix):
 # RequestHandlers
 #
 
-render = web.template.render('templates/', globals=template_globals, base='bslayout')
-render_wo_layout = web.template.render('templates/', globals=template_globals)
+render = web.template.render('templates/', base='bslayout')
+render_wo_layout = web.template.render('templates/')
 
 class Index(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1034.5: we encountered a')
@@ -186,76 +185,68 @@ class Config(FakeWebapp2RequestHandler):
         return render.config(tree, cldr, ud, info, invalid, tab)
 
 
-
 class Boxes(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1407.1: You green blooded bastard')
     @decorator.oauth_required
     def GET(self):
-        web.header('Cache-control', 'must-revalidate')
+        http = decorator.http()
         user = users.get_current_user()
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
-        http = decorator.http()
-
         # GET SELECTED SPREADSHEETS:
         if len(ud.spreadsheet_id.split(',')[0]) == 0:
             web.seeother('/config')
-        
         return render.boxes(ud, info)
 
-        # data = web.input(flipped=None, add=None)
-        #SSCOLL = {}
-        #for ssid in ud.spreadsheet_id.split(','):
-        #    cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-        #    # If a box got flipped
-        #    if bool(data.flipped) and data.ssid == ssid:
-        #        args = flyboxes.set_modified_on_Box(cellfeed, data.ssid, data.boxname)
-        #        GoogleSpreadsheets.set_cell(*args, http=http)
-        #        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-        #    # If a box got added to the calendar
-        #    if bool(data.add) and data.ssid == ssid:
-        #        BOXES = flyboxes.get_boxes_from_cellfeed(cellfeed)
-        #        box = next(b for b in BOXES if b['name'] == data.boxname)
-        #        desc = '%s :: %s' % (box['name'], box['ssid'])
-        #        nev = GoogleCalendar.add_recurring_1day_event(calendarId=data.clid,
-        #                summary=box['name'], description=desc, start=data.start,
-        #                recurrence_days=data.freq, location=data.location, http=http)
-        #        args = flyboxes.set_calid_on_Box(cellfeed, data.ssid, data.boxname, data.clid, nev['id'])
-        #        GoogleSpreadsheets.set_cell(*args, http=http)
-        #        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-        #    
-        #    SSCOLL[ssid] = flyboxes.get_boxes_from_cellfeed(cellfeed)
 
-        # GET EVENTS
-        #CLCOLL = {}
-        #if len(ud.calendar_id.split(',')[0]) == 0:
-        #    web.seeother('/calendar')
-        
-        #for clid in ud.calendar_id.split(','):
-        #    if len(clid) > 0:
-        #        CLCOLL[clid] = GoogleCalendar.iter_events(calendarId=clid, http=http) 
-        # SET SCHEDULING DATES
-        #for box, clid, evid in flyboxes.compare_boxes_and_events_coll(SSCOLL, CLCOLL):
-        #    flyboxes.set_schedule_on_Box(box, clid, evid, GoogleCalendar, http)
-
-
-
-class Spreadsheet(FakeWebapp2RequestHandler):
+class Flies(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1820.2: Space, the final frontier')
     @decorator.oauth_required
     def GET(self):
         http = decorator.http()
-        data = web.input(ssid=None, ssname=None)
         user = users.get_current_user()
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
-        if (data.ssid is None):
-            raise Exception("no ssid query parameter")
-        if (data.ssname is None):
-            raise Exception("no ssname query parameter")
-        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
-        boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
-        return render.spreadsheet(data.ssid, data.ssname, boxes, True, ud, info)
+        # GET SELECTED SPREADSHEETS:
+        if len(ud.spreadsheet_id.split(',')[0]) == 0:
+            web.seeother('/config')
+        return render.flies(ud, info)
+
+
+
+class BoxData(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1820.2: Space, the final frontier')
+    @decorator.oauth_required
+    def GET(self):
+        http = decorator.http()
+        try:
+            data = web.input()
+            ssid, ssname = data.ssid, data.ssname
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        except Exception as e: #replace with BoxError
+            boxtext = e.message
+            return render_wo_layout.boxdata("ERROR", ssid, ssname, [], boxtext )
+        else:
+            return render_wo_layout.boxdata("OK", ssid, ssname, boxes, "" )
+
+
+class FlyData(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1820.2: Space, the final frontier')
+    @decorator.oauth_required
+    def GET(self):
+        http = decorator.http()
+        try:
+            data = web.input()
+            ssid, ssname = data.ssid, data.ssname
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        except Exception as e: #replace with BoxError
+            boxtext = e.message
+            return render_wo_layout.flydata("ERROR", ssid, ssname, [], boxtext )
+        else:
+            return render_wo_layout.flydata("OK", ssid, ssname, boxes, "" )
+
 
 
 
@@ -296,35 +287,6 @@ class PdfLabels(FakeWebapp2RequestHandler):
         return r.content
 
 
-class FlyData(FakeWebapp2RequestHandler):
-    @printerrors('Stardate 1820.2: Space, the final frontier')
-    @decorator.oauth_required
-    def GET(self):
-        http = decorator.http()
-        data = web.input(ssid=None, ssname=None)
-        user = users.get_current_user()
-        ud = get_userdata(user)
-        info = get_header_info(user, decorator)
-        if (data.ssid is None):
-            raise Exception("no ssid query parameter")
-        if (data.ssname is None):
-            raise Exception("no ssname query parameter")
-        cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(data.ssid, http=http)
-        boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
-        return render.flydata(data.ssid, data.ssname, boxes, info)
-
-
-class Flies(FakeWebapp2RequestHandler):
-    @printerrors('Stardate 1820.2: Space, the final frontier')
-    @decorator.oauth_required
-    def GET(self):
-        web.header('Cache-control', 'must-revalidate')
-        http = decorator.http()
-        user = users.get_current_user()
-        ud = get_userdata(user)
-        info = get_header_info(user, decorator)
-        return render.flies(ud, info)
-
 class Help(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1820.2: Space, the final frontier')
     @decorator.oauth_aware
@@ -344,7 +306,7 @@ appoauth = decorator.callback_application()
 urls = ( "/",            "Index",
          "/config",      "Config",
          "/boxes",       "Boxes",
-         "/spreadsheet", "Spreadsheet",
+         "/boxdata",     "BoxData",
          "/labels",      "PdfLabels",
          "/flies",       "Flies",
          "/flydata",     "FlyData",

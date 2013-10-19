@@ -1,5 +1,4 @@
 $def with (ud, info)
-
 $# set all statically loaded files for this template
 $var title: webFlipFlapp
 $var login_link: $info['login_url']
@@ -9,31 +8,27 @@ $var user_email: $info['email']
 $var nickname: $info['nickname']
 $var has_cred: $info['has_cred']
 $var page: boxes
-
 $ SPREADSHEETS = ud.spreadsheet_name.split(',')
 $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
-
 $var jsfiles: /static/js/wff.js
 $var jscode: 
-
 <div class="container">
-
 <h3>Boxes in your stocklists</h3>
 <p>View and manage all your Boxes on this page. You can print labels for individual Boxes, or all boxes in a stocklist. To search for flies, goto the <a href="/flies">Flies-page</a>.</p>
 <p>&nbsp;</p>
-
 $for ssid, ssname in zip(SSID,SPREADSHEETS):
     <div id="wff-boxes-spreadsheet-heading-$(ssid)">
-      <ul class="breadcrumb">
-        <li><strong>$(ssname)</strong> <span class="divider">|</span></li>
-        <li>loading spreadsheet <i class="icon-spinner icon-spin"></i></li>
-      </ul>
+    <ul class="breadcrumb">
+    <li><strong>$(ssname)</strong></li>
+    <li><span class="divider">|</span></li>
+    <li>loading spreadsheet <i class="icon-spinner icon-spin"></i></li>
+    </ul>
     </div> 
 
     <div id="wff-boxes-spreadsheet-container-$(ssid)"></div>
-    <iframe id="wff-boxes-workaround-$(ssid)" style="display:none" src="/spreadsheet?ssid=$(ssid)&ssname=$(ssname)" onload="workaround('$(ssid)')"></iframe>
+    <iframe id="wff-boxes-workaround-$(ssid)" style="display:none" src="/boxdata?ssid=$(ssid)&ssname=$(ssname)"></iframe>
 
 </div>
 

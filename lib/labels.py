@@ -7,18 +7,18 @@ import string
 import random
 
 def replace_latex_cmd_chars(string):
-    CC = [ ('\\', '\\backslash'),
+    CC = [ ('\\', '\\textbackslash '),
            ('&nbsp;', ' '), # needs to be before & replacement.
            ('&gt;', '>'),
            ('&lt;', '<'),
-           ('_', '\\textunderscore'),
-           ('&', '\\&'),
-           ('%', '\\%'),
-           ('#', '\\#'),
+           ('_', '\\textunderscore '),
+           ('&', '\\& '),
+           ('%', '\\% '),
+           ('#', '\\# '),
            # (' ', '\\_'), do not replace spaces
-           ('{', '\\{'),
-           ('}', '\\}'),
-           ('$', '\\textdollar'), ]
+           ('{', '\\{ '),
+           ('}', '\\} '),
+           ('$', '\\textdollar '), ]
     for c, lc in CC:
         string = string.replace(c, lc)
     return string.strip()

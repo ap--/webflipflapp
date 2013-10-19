@@ -1,58 +1,98 @@
+/* WebFlipFlapp
+ *
+ *  javascript things
+ *
+ */
 
-function loadSpreadsheet( ssid, ssname ) {
-    $.get('/spreadsheet', { 'ssid': ssid, 'ssname': ssname }, function(data) {
-        var html = jQuery('<div>').html(data);
-        var header = html.find('.breadcrumb');
-        var boxes = html.find('.thumbnails');
-        $('#wff-boxes-spreadsheet-heading-' + ssid + " ul" ).replaceWith(header);
-        $('#wff-boxes-spreadsheet-container-' + ssid).append(boxes);
-    });
-}
-
-function workaround( ssid ) {
+// ~~~ BOXES ~~~ //
+//
+function wffBoxesLoaded( ssid ) {
+    /* this function gets called in boxdata.html
+     * and adds its content to boxes.html
+     */
     var myframe = $('#wff-boxes-workaround-' + ssid).contents();
+    // this lives in boxdata.html
     var header = myframe.find('.breadcrumb');
     var boxes = myframe.find('.thumbnails');
+    // theese ids live in boxes.html
     $('#wff-boxes-spreadsheet-heading-' + ssid + " ul" ).replaceWith(header);
     $('#wff-boxes-spreadsheet-container-' + ssid).append(boxes);
+    $('#wff-boxes-workaround-' + ssid).remove();
+}
+
+function wffBoxesError( ssid, errormsg ) {
+    $('#wff-boxes-spreadsheet-heading-' + ssid + " i" )
+        .removeClass('icon-spinner icon-spin').addClass('icon-warning-sign');
+    $('#wff-boxes-spreadsheet-container-' + ssid).html(
+        '<div class="alert alert-error">' + errormsg + '</div>'
+    );
 }
 
 
-function loadFlies( ssid, ssname ) {
-    $.get('/flydata', { 'ssid': ssid, 'ssname': ssname }, function(data) {
-        var html = jQuery('<div>').html(data);
-        var flies = html.find('tbody tr');
-        $('#wff-boxes-flies').append(flies);
-        $('.table').trigger('footable_redraw');
-        $('#wff-box-loader-' + ssid).removeClass('label-info').addClass('label-success').html(ssname + '<i class="icon-ok"></i>');
-    });
-}
-
-function workaroundFlies( ssid ) {
+// ~~~ FLIES ~~~
+//
+function wffFliesLoaded( ssid ) {
+    /* this function gets called in flydata.html
+     * and adds its content to flies.html
+     */
+    // this lives in flydata.html
     var flies = $('#wff-flies-workaround-' + ssid).contents().find('tbody tr');
+    // theese live in flies.html
     $('#wff-boxes-flies').append(flies);
     $('.table').trigger('footable_redraw');
-    $('#wff-box-loader-' + ssid).removeClass('label-info').addClass('label-success')
-    $('#wff-box-loader-' + ssid + ' i').removeClass('icon-spinner icon-spin').addClass('icon-ok');
+    $('#wff-box-loader-'+ssid).removeClass('label-warning').addClass('label-success');
+    $('#wff-box-loader-'+ssid+' i').removeClass('icon-spinner icon-spin').addClass('icon-ok');
+    $('#wff-flies-workaround-' + ssid).remove();
 }
 
-function generateHeader( ssid, boxname, N ) {
-    var Header = "";
-    Header += "<div class='wff-boxes-calendar-container wff-minimized'>";
-    Header += "<p><span><strong><a onclick='viewBox(\""+ssid+"\","+N+")'>"+boxname+"</a></strong></span>";
-    Header += "<span>scheduled:</span>";
-    Header += "</div>"
-    return Header;
+function wffFliesError( ssid, errormsg ) {
+    $('#wff-box-loader-'+ssid).removeClass('label-warning').addClass('label-important');
+    $('#wff-box-loader-'+ssid+' i')
+        .removeClass('icon-spinner icon-spin').addClass('icon-warning-sign');
+    var error = $('<div class="alert alert-error">' + errormsg + '</div>');
+    $('#wff-box-error').append(error);
 }
 
-function viewBox( ssid, N ) {
-    $("#box-header-" + ssid + "-" + N).toggleClass('wff-minimized');
-    $("#box-data-" + ssid + "-" + N).toggle('fast');
-    $(".footable").resize();
+
+function wffFliesSetup() {
+    // eneables filtering on footable in flies.html
+    $('table').footable().bind('footable_filtering', 
+        function (e) {
+            var selected = $('.filter-status').find(':selected').text();
+            if (selected && selected.length > 0) {
+                e.filter += (e.filter && e.filter.length > 0) ? ' ' + selected : selected;
+                e.clear = !e.filter;
+            };
+        });
+    $('.filter-status').change(function (e) {
+            e.preventDefault();
+            $('table').trigger('footable_filter', {filter: $('#filter').val()});
+        });
 }
 
-function viewAllBoxes( ssid, N ) {
-    for (var i=0;i<N;i++) {
-        viewBox( ssid, i );
-    };
+function wffFliesGetFilteredData() {
+    // gets called in flies.html when clicked on Download Labels
+    var flies = [];
+    var data = $("tbody tr")
+                .filter(function() { return $(this).css("display") == "table-row" });
+    for (var i=0; i<data.length;i++) {
+        var row = data.eq(i).find('td');
+        var fly = {};
+        fly['Label'] = row.eq(0).text();
+        fly['Short Identifier'] = row.eq(1).text();
+        fly['Genotype'] = row.eq(2).text();
+        flies.push(fly);
+    }
+    $('#wff-flies-form-data').val(JSON.stringify(flies));
+    return true;
 }
+
+function wffImpossibleError( ssid ) {
+    $('#wff-box-loader-'+ssid).removeClass('label-warning').addClass('label-important');
+    $('#wff-box-loader-'+ssid+' i')
+        .removeClass('icon-spinner icon-spin').addClass('icon-bolt');
+    alert('Oh my God! Run!');
+}
+
+
+
