@@ -18,6 +18,7 @@ from apiclient.discovery import build
 import apgooglelayer.drive
 import apgooglelayer.calendar
 import apgooglelayer.spreadsheets
+from apgooglelayer.spreadsheets.oauth2client_gdata_bridge import OAuth2BridgeError
 
 
 ### Google Appengine imports
@@ -224,6 +225,8 @@ class BoxData(FakeWebapp2RequestHandler):
             ssid, ssname = data.ssid, data.ssname
             cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
             boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        except OAuth2BridgeError:
+            web.seeother(decorator.authorize_url())
         except Exception as e: #replace with BoxError
             boxtext = e.message
             return render_wo_layout.boxdata("ERROR", ssid, ssname, [], boxtext )
@@ -241,6 +244,8 @@ class FlyData(FakeWebapp2RequestHandler):
             ssid, ssname = data.ssid, data.ssname
             cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
             boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+        except OAuth2BridgeError:
+            web.seeother(decorator.authorize_url())
         except Exception as e: #replace with BoxError
             boxtext = e.message
             return render_wo_layout.flydata("ERROR", ssid, ssname, [], boxtext )
