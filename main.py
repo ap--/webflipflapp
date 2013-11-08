@@ -226,7 +226,8 @@ class BoxData(FakeWebapp2RequestHandler):
             cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
             boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
         except OAuth2BridgeError:
-            web.seeother(decorator.authorize_url())
+            # web.seeother(decorator.authorize_url())
+            raise # this should be handled by decorator.oauth_required
         except Exception as e: #replace with BoxError
             boxtext = e.message
             return render_wo_layout.boxdata("ERROR", ssid, ssname, [], boxtext )
@@ -239,18 +240,17 @@ class FlyData(FakeWebapp2RequestHandler):
     @decorator.oauth_required
     def GET(self):
         http = decorator.http()
+        data = web.input()
         try:
-            data = web.input()
-            ssid, ssname = data.ssid, data.ssname
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
-            boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
+            ssid, ssname = data.ssid, data.ssname # throws AttributeError on failure
+            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http) # throws OAuth2BridgeError
+            boxes = flyboxes.get_boxes_from_cellfeed(cellfeed) # throws FlyBoxError
+        except (AttributeError, flyboxes.FlyBoxError) as e:
+            return render_wo_layout.flydata("ERROR", ssid, ssname, [], e.message )
         except OAuth2BridgeError:
-            web.seeother(decorator.authorize_url())
-        except Exception as e: #replace with BoxError
-            boxtext = e.message
-            return render_wo_layout.flydata("ERROR", ssid, ssname, [], boxtext )
-        else:
-            return render_wo_layout.flydata("OK", ssid, ssname, boxes, "" )
+            raise # this should be handled by decorator.oauth_required 
+        #>
+        return render_wo_layout.flydata("OK", ssid, ssname, boxes, "" )
 
 
 
