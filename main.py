@@ -11,13 +11,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib_third_party'))
 import web
 from oauth2client.appengine import OAuth2DecoratorFromClientSecrets
 from oauth2client_webpy_bridge import FakeWebapp2RequestHandler
+import fakespreadsheets
 
 
 ### Google API interfaces
 from apiclient.discovery import build
 import apgooglelayer.drive
 import apgooglelayer.calendar
-import apgooglelayer.spreadsheets
 from apgooglelayer.spreadsheets.oauth2client_gdata_bridge import OAuth2BridgeError
 
 
@@ -101,7 +101,6 @@ decorator = OAuth2DecoratorFromClientSecrets(
 
 GoogleDrive = apgooglelayer.drive.GoogleDrive()
 GoogleCalendar = apgooglelayer.calendar.GoogleCalendar()
-GoogleSpreadsheets = apgooglelayer.spreadsheets.GoogleSpreadsheets()
 
 
 
@@ -160,7 +159,7 @@ class Config(FakeWebapp2RequestHandler):
         names = []
         for selected in spreadsheets:
             name = tree.get_first_where(lambda k: k['id']==selected)['title']
-            cells = GoogleSpreadsheets.get_cells_from_first_worksheet(selected, http=http)
+            cells = fakespreadsheets.fakecellfeed_from_ssid(selected, http)
             if cells and cells[0].content.text == 'WFF:FLYSTOCK':
                 names.append(name)
             else:
@@ -223,7 +222,7 @@ class BoxData(FakeWebapp2RequestHandler):
         try:
             data = web.input()
             ssid, ssname = data.ssid, data.ssname
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+            cellfeed = fakespreadsheets.fakecellfeed_from_ssid(ssid, http)
             boxes = flyboxes.get_boxes_from_cellfeed(cellfeed)
         except OAuth2BridgeError:
             # web.seeother(decorator.authorize_url())
@@ -243,7 +242,7 @@ class FlyData(FakeWebapp2RequestHandler):
         data = web.input()
         try:
             ssid, ssname = data.ssid, data.ssname # throws AttributeError on failure
-            cellfeed = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http) # throws OAuth2BridgeError
+            cellfeed = fakespreadsheets.fakecellfeed_from_ssid(ssid, http)
             boxes = flyboxes.get_boxes_from_cellfeed(cellfeed) # throws FlyBoxError
         except (AttributeError, flyboxes.FlyBoxError) as e:
             return render_wo_layout.flydata("ERROR", ssid, ssname, [], e.message )
@@ -263,7 +262,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
         bn = web.input(box=None).box
 
         http = decorator.http()
-        cf = GoogleSpreadsheets.get_cells_from_first_worksheet(ssid, http=http)
+        cf = fakespreadsheets.fakecellfeed_from_ssid(ssid, http)
         boxes = flyboxes.get_boxes_from_cellfeed(cf)
         flies = []
         for box in boxes:

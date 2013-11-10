@@ -58,7 +58,7 @@ def get_boxes_from_cellfeed(cellfeed):
         v = cgi.escape(c.content.text)
         if x == 1 and y == 1:
             if v != cgi.escape("WFF:FLYSTOCK"):
-                raise FlyBoxError("""<strong>ERROR:</strong> The first cell in the Stocklist is not "WFF:FLYSTOCK". This is a required setting. Please use the template file for your stocklists.""")
+                raise FlyBoxError("""<strong>ERROR:</strong> The first cell in the Stocklist is not "WFF:FLYSTOCK". This is a required setting. Please use the template file for your stocklists. '%s'""" % v)
         # skip the first two lines
         if y < 3:
             continue
@@ -105,7 +105,7 @@ def get_boxes_from_cellfeed(cellfeed):
                 if CHECKLAB[i] != FBLABELS[i]:
                     raise IndexError()
             except IndexError:
-                raise FlyBoxError("""<strong>Error:</strong> The box %s does not have all Labels! Error with column-label in column #%d: should be &quot;%s&quot;. Please look at the template.""" % (b['name'], i+1, FBLABELS[i]))
+                raise FlyBoxError("""<strong>Error:</strong> The box %s does not have all Labels! Error with column-label in column #%d: should be &quot;%s&quot; but is &quot;%s&quot;. Please look at the template.""" % (b['name'], i+1, FBLABELS[i], CHECKLAB[i]))
         # get flies
         for j in range(1,ylen):
             fly = {}
