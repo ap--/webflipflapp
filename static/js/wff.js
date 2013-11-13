@@ -36,9 +36,9 @@ function wffFliesLoaded( ssid ) {
      * and adds its content to flies.html
      */
     // this lives in flydata.html
-    var flies = $('#wff-flies-workaround-' + ssid).contents().find('tbody tr');
+    var flies = $('#wff-flies-workaround-' + ssid).contents().find('tbody');
     // theese live in flies.html
-    $('#wff-boxes-flies').append(flies);
+    $('#wff-boxes-flies-'+ssid).replaceWith(flies);
     $('.table').trigger('footable_redraw');
     $('#wff-box-loader-'+ssid).removeClass('label-warning').addClass('label-success');
     $('#wff-box-loader-'+ssid+' i').removeClass('icon-spinner icon-spin').addClass('icon-ok');

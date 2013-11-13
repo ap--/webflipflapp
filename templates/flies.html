@@ -56,7 +56,7 @@ $var jscode: $:"wffFliesSetup();"
         <th data-hide="phone">Stocklist</th>
       </tr>
     </thead>
-    <tbody id="wff-boxes-flies">
-    </tbody>
+    $for ssid in SSID:
+        <tbody id="wff-boxes-flies-$(ssid)"></tbody>
   </table>
 </div>
