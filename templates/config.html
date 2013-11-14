@@ -14,12 +14,16 @@ $ SPREADSHEETS = ud.spreadsheet_name.split(',')
 $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
+$ lta4checked = "checked" if ud.labelpagesize == "a4" else ""
+$ ltuschecked = "checked" if ud.labelpagesize == "us" else ""
 
 $ tab1active = "active" if tab == "tab1" else ""
 $ tab2active = "active" if tab == "tab2" else ""
+$ tab3active = "active" if tab == "tab3" else ""
 
 $ test = """$('#savess').click(function() {$(this).button('loading');});
 $           $('#savecl').click(function() {$(this).button('loading');});
+$           $('#savelt').click(function() {$(this).button('loading');});
 $           """
 $var jscode: $:test
 
@@ -44,6 +48,9 @@ $if invalid:
     </li>
     <li class="$tab2active">
       <a href="#tab2" data-toggle="tab">Calendars</a>
+    </li>
+    <li class="$tab3active">
+      <a href="#tab3" data-toggle="tab">Label template</a>
     </li>
   </ul>
   <div class="tab-content">
@@ -96,7 +103,7 @@ $if invalid:
         <div class="span12">
           <h3>Calendar selection</h3>
           <p>Choose one or several calendars that are going to be used for scheduling the boxes. If you want to create a new calendar, please do that via the <a href="https://www.google.com/calendar">Google Calendar</a> web interface. Refresh this page after.</p>
-        <div>
+        </div>
       </div>
     
       <form name='input' action="/config" method='get'>
@@ -130,6 +137,38 @@ $if invalid:
       </form>
 
     </div>
+
+    <div class="tab-pane $tab3active" id="tab3">
+      <div class="row">
+        <div class="span12">
+          <h3>Template selection</h3>
+          <p>Choose your favorite template type.</p>
+        </div>
+      </div>
+    
+      <form name='input' action="/config" method='get'>
+        <label class="radio">
+        <input type='radio' name='pagesize' value="a4" $(lta4checked)/>
+            Avery 3667, A4 label-paper
+        </label>
+        <label class="radio">
+        <input type='radio' name='pagesize' value="us" $(ltuschecked)/>
+            Avery 5155, US-letter label paper
+        </label>
+
+        <input type="hidden" name="tab" value="tab3">
+
+        <div class="form-actions">
+          <div class="pull-right">          
+            <button type="submit" class="btn btn-primary" id="savelt" data-loading-text="Saving <i class='icon-spinner icon-spin'></i>" data-toggle="button">Save changes</button>
+            <button type="button" class="btn" id="resetlt">Reset</button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+
 
   </div>
 </div>

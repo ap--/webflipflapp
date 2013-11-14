@@ -49,7 +49,8 @@ class UserData(db.Model):
     spreadsheet_name = db.StringProperty()
     calendar_id = db.StringProperty()
     calendar_name = db.StringProperty()
-        
+    labelpagesize = db.StringProperty()
+
     def get_names(self):
         return self.spreadsheet_name, self.calendar_name
 
@@ -69,6 +70,10 @@ class UserData(db.Model):
         self.calendar_name = name
         self.put()
 
+    def set_labelpagesize(self, size):
+        self.labelpagesize = size
+        self.put()
+
 
 def get_userdata(user):
     userdata_k = db.Key.from_path('UserData', user.user_id())
@@ -76,7 +81,8 @@ def get_userdata(user):
     if userdata is None:
         userdata = UserData(key_name=user.user_id(), 
                         spreadsheet_id='', spreadsheet_name='no spreadsheet',
-                        calendar_id='', calendar_name='no calendar')
+                        calendar_id='', calendar_name='no calendar',
+                        labelpagesize='a4')
         userdata.put()
     return userdata
 
@@ -180,6 +186,17 @@ class Config(FakeWebapp2RequestHandler):
         if calendars:
             ud.set_calendar(",".join(calendars), ",".join(names))
 
+        # template
+        pagesize = web.input(pagesize=None).pagesize
+        if pagesize is None:
+            try:
+                mp = ud.labelpagesize
+            except:
+                ud.set_labelpagesize("a4")
+        else:
+            ud.set_labelpagesize(pagesize)
+
+
         # select tabs
         tab = web.input(tab="tab1").tab
         return render.config(tree, cldr, ud, info, invalid, tab)
@@ -260,6 +277,12 @@ class PdfLabels(FakeWebapp2RequestHandler):
     def GET(self):
         ssid = web.input().ssid 
         bn = web.input(box=None).box
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        try:
+            ps = ud.labelpagesize
+        except:
+            ps = 'a4'
 
         http = decorator.http()
         cf = fakespreadsheets.fakecellfeed_from_ssid(ssid, http)
@@ -270,7 +293,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
                 continue
             flies.extend(box['flies'])
 
-        URL, OPTIONS = labels.pdflink(flies)
+        URL, OPTIONS = labels.pdflink(flies, template=ps)
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
@@ -285,8 +308,14 @@ class PdfLabels(FakeWebapp2RequestHandler):
             skip = int(web.input(skip=0).skip)
         except:
             skip = 0
+        user = users.get_current_user()
+        ud = get_userdata(user)
+        try:
+            ps = ud.labelpagesize
+        except:
+            ps = 'a4'
         flies = json.loads(tabledata)
-        URL, OPTIONS = labels.pdflink(flies, skip=skip)
+        URL, OPTIONS = labels.pdflink(flies, skip=skip, template=ps)
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
