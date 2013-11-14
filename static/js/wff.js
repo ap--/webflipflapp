@@ -70,11 +70,29 @@ function wffFliesSetup() {
         });
 }
 
-function wffFliesGetFilteredData() {
+
+function wffFliesCountSelected() {
+    var data = $("tbody tr")
+            .filter(function() { return $(this).find("input").prop("checked") });
+    $("#wff-selected-N").val(data.length);
+}
+
+
+function wffFliesClearSelected() {
+    $('input:checkbox').removeAttr('checked');
+    $("#wff-selected-N").val(0);
+}
+
+function wffFliesGetData( mode ) {
     // gets called in flies.html when clicked on Download Labels
     var flies = [];
-    var data = $("tbody tr")
+    if (mode == "selected") {
+        var data = $("tbody tr")
+                .filter(function() { return $(this).find("input").prop("checked") });
+    } else {
+        var data = $("tbody tr")
                 .filter(function() { return $(this).css("display") == "table-row" });
+    };
     for (var i=0; i<data.length;i++) {
         var row = data.eq(i).find('td');
         var fly = {};
@@ -83,9 +101,11 @@ function wffFliesGetFilteredData() {
         fly['Genotype'] = row.eq(2).text();
         flies.push(fly);
     }
-    $('#wff-flies-form-data').val(JSON.stringify(flies));
+    $('#wff-flies-labels-form-data').val(JSON.stringify(flies));
+    $('#wff-flies-labels-form').submit()
     return true;
 }
+
 
 function wffImpossibleError( ssid ) {
     $('#wff-box-loader-'+ssid).removeClass('label-warning').addClass('label-important');

@@ -23,6 +23,7 @@ $if status == 'OK':
             <td>$:(fly['Mod'])</td>
             <td>$:(box['name'])</td>
             <td data-value="$ssid">$ssname</td>
+            <td><input type="checkbox" onclick="wffFliesCountSelected()"></td>
             </tr>
     </tbody></table><script>
     window.onload = function() { parent.wffFliesLoaded('$ssid'); };

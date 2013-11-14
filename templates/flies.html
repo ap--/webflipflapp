@@ -22,21 +22,37 @@ $var jscode: $:"wffFliesSetup();"
         <iframe id="wff-flies-workaround-$(ssid)" style="display:none" src="/flydata?ssid=$(ssid    )&ssname=$(ssname)"></iframe>
   </p>
   <div id="wff-box-error"></div>
-  <form class="form-inline" action='/labels' onsubmit="wffFliesGetFilteredData()" method="post" target="_blank">
-    <input type="hidden" id="wff-flies-form-data" name="tabledata" value="" />
-    <fieldset>
-      <legend>Search</legend>
-      <label>Match:</label>
-      <input id="filter" type="text" placeholder="foo bar baz ..."/>
-      <label>Stocklist:</label>
-      <select class="filter-status">
+
+  <div class="row-fluid">
+    <div class="span6">
+      <form class="form-inline">
+        <fieldset>
+          <legend>Search</legend>
+          <label>Match:</label>
+          <input id="filter" type="text" placeholder="foo bar baz ..."/>
+          <label>Stocklist:</label>
+          <select class="filter-status">
                  <option></option>
                  $for (slid, sln) in zip(SSID,SPREADSHEETS):
                      <option value="$slid">$sln</option>
-      </select>
-      <button type="submit" class="btn">Download labels</button>
-    </fieldset>
-  </form>
+          </select>
+        </fieldset>
+      </form>
+    </div>
+    <div class="span6">
+      <form class="form-inline pull-left" id="wff-flies-labels-form" action='/labels' method="post" target="_blank">
+          <fieldset>
+          <legend>Labels</legend>
+            <input type="hidden" id="wff-flies-labels-form-data" name="tabledata" value="" />
+            <label>Selected:</label>
+            <input class="input-mini" type="text" id="wff-selected-N" value="0" disabled/>
+            <button type="button" onclick="wffFliesGetData('selected')" class="btn">Download selected</button>
+            <button type="button" onclick="wffFliesClearSelected()" class="btn">Clear selected</button>
+            <button type="button" onclick="wffFliesGetData('visible')" class="btn">Download visible</button>
+          </fieldset>
+      </form>
+    </div>
+  </div>
 
   <table class="footable table" data-filter="#filter" data-filter-text-only="true">
     <thead>
@@ -54,6 +70,7 @@ $var jscode: $:"wffFliesSetup();"
         <th data-hide="all">Mod</th>
         <th data-hide="phone">Box</th>
         <th data-hide="phone">Stocklist</th>
+        <th></th>
       </tr>
     </thead>
     $for ssid in SSID:
