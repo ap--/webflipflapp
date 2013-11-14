@@ -84,11 +84,12 @@ TEMPLATE_START = [
     "",
     "\\begin{document}\n" ]
 #TEMPLATE_LABEL = "\\prettylabel{%s}{%s}{%s}{%s}{%s}"
+TEMPLATE_SKIP = ["\\addresslabel{}"]
 TEMPLATE_STOP = ["\n\\end{document}"]
  
 
 
-def get_tex(flies):
+def get_tex(flies, skip=0):
 
     SELECT = { 0 : 'Label', 1 : None, 2 : 'Short Identifier', 3 : 'Genotype', 4 : None}
     OVERRIDE = ( None, None, None, None, datetime.datetime.now().strftime('%Y-%m-%d') )
@@ -98,12 +99,12 @@ def get_tex(flies):
         fields = row2fields(fly, SELECT, OVERRIDE)
         LABELS.append( label(fields) )
 
-    return "\n".join( TEMPLATE_START + LABELS + TEMPLATE_STOP ) 
+    return "\n".join( TEMPLATE_START + (TEMPLATE_SKIP*skip) + LABELS + TEMPLATE_STOP ) 
 
 
-def pdflink(flies, out=None, dpi=600):
+def pdflink(flies, out=None, dpi=600, skip=0):
     URL = 'http://sciencesoft.at/image/latexurl/%s' % out
-    tex = get_tex(flies)
+    tex = get_tex(flies, int(skip))
     try:
         tex = unicode(tex, 'utf-8')
     except:

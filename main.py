@@ -281,8 +281,12 @@ class PdfLabels(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1561.8: Humans are highly illogical')
     def POST(self):
         tabledata = web.input().tabledata
+        try:
+            skip = int(web.input(skip=0).skip)
+        except:
+            skip = 0
         flies = json.loads(tabledata)
-        URL, OPTIONS = labels.pdflink(flies)
+        URL, OPTIONS = labels.pdflink(flies, skip=skip)
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()

@@ -13,7 +13,7 @@ $ CALENDARS = ud.calendar_name.split(',')
 $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
 $var jsfiles: /static/js/wff.js
-$var jscode: $:"wffFliesSetup();"
+$var jscode: $:"wffFliesSetup(); $('.myremoveclick').click(function(e){e.stopPropagation();});"
 <div class="container">
   <h3>Flies in your Stocklists</h3>
   <p>Loading: 
@@ -46,10 +46,21 @@ $var jscode: $:"wffFliesSetup();"
             <input type="hidden" id="wff-flies-labels-form-data" name="tabledata" value="" />
             <label>Selected:</label>
             <input class="input-mini" type="text" id="wff-selected-N" value="0" disabled/>
-            <button type="button" onclick="wffFliesGetData('selected')" class="btn">Download selected</button>
-            <button type="button" onclick="wffFliesClearSelected()" class="btn">Clear selected</button>
-            <button type="button" onclick="wffFliesGetData('visible')" class="btn">Download visible</button>
+            <button type="button" onclick="wffFliesGetData('selected')" class="btn">get selected</button>
+            <button type="button" onclick="wffFliesClearSelected()" class="btn">clear selected</button>
+            <button type="button" onclick="wffFliesGetData('visible')" class="btn">get visible</button>
+            <div class="btn-group">
+              <button class="btn dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-cogs"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                <a class="myremoveclick" tabindex='-1' href='#'>skip <input class="input-mini" type="text" value="0" name="skip"></a>  
+                </li>
+              </ul>
+            </div>
           </fieldset>
+
       </form>
     </div>
   </div>
