@@ -56,7 +56,7 @@ TEMPLATE_US_START = [
     "\\linespread{0.4}",
     "\\usepackage[newdimens]{labels}",
     "\\LabelCols=4",
-    "\\LabelRows=16",
+    "\\LabelRows=15",
     "\\LeftPageMargin=8mm",
     "\\RightPageMargin=8mm",
     "\\TopPageMargin=15mm",
