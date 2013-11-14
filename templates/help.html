@@ -23,9 +23,36 @@ $var page: help
 
 <p>If you want to help, contact me via email <a href="mailto:wff@andreaspoehlmann.de">wff@andreaspoehlmann.de</a>. Currently I'll only work on this when I find the time, but I am happy if you report bugs, or have any feature request.</p>
 
+<h3>Getting started</h3>
+
+<p>To get started download the template from the config page and upload it to your google drive. Ensure that it gets converted to a google Docs format when uploading. After that the spreadsheet should show up in the confg page. Click the checkbox of one or several spreadsheets and save your settings. The app will only display selected spreadsheets.</p>
+
 <h3>The WebFlipFlapp File Format</h3>
 
-<p>The format should be self explaining. You can put the string <strong>WFF:IGNORE</strong> somewhere in the first column of your spreadsheet, and the app will ignore everything after that row.</p>
+<p>The format should be self explaining. Please leave the first two rows untouched. The spreadsheet has to comply with the following things:</p>
+
+<ul>
+    <li>The first column, first row cell has to be <strong>WFF:FLYSTOCK</strong> </li>
+    <li>New boxes can be created in a spreadsheet by copying the two box header columns. Boxes need to be seperated by at least two empty rows</li>
+    <li>Do not change the format of the two box header columns. <em>(you can/should change the boxname)</em></li>
+    <li>Box names have to be unique in a spreadsheet.</li>
+</ul>
+
+<p>There are some additional things that you can use:</p>
+<ul>
+    <li>put <strong>WFF:IGNORE</strong> somewhere in the first column of your spreadsheet, and the app will ignore everything after that row.</li>
+    <li>add <strong class="text-info">WFF:HOSPITAL</strong>, <strong class="text-warning">WFF:WARNING</strong> or <strong class="text-error">WFF:DEAD</strong> to the <em>Mod</em> column of a fly to hightlight it in the flies view</li>
+</ul>
+
+<h3>Getting labels</h3>
+
+<p>Labels can be generated in several different ways. You can download labels in the <em>boxes</em> page for single boxes or whole flystocks. Another option is to download labels in the <em>flies</em> view. You can either create them for all displayed flies (the ones filtered by your search terms) or select flies and only create them for the selected ones.</p>
+
+<ul class="unstyled">
+    <li><em>Hint: searching while selecting flies is possible! The app remembers your selection</em></li>
+    <li><em>Hint: you can save the environment and use old labelsheets by specifying how many empty labels should be on the pdf with the skip option</em></li>
+</ul>
+
 
 
 </div>

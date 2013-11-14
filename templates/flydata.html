@@ -9,8 +9,18 @@ $if status == 'OK':
     <table><tbody>
     $for box in boxes:
         $for fly in box['flies']:
-            <tr>
-            <td>$:(fly['Label'])</td>
+            $if "WFF:DEAD" in fly['Mod']:
+                <tr class="text-error">
+                <td><i class="icon-frown text-error"></i> $:(fly['Label'])</td>
+            $elif "WFF:HOSPITAL" in fly['Mod']:
+                <tr class="text-info">
+                <td><i class="icon-ambulance"></i> $:(fly['Label'])</td>
+            $elif "WFF:WARNING" in fly['Mod']:
+                <tr class="text-warning">
+                <td><i class="icon-warning-sign"></i> $:(fly['Label'])</td>
+            $else:
+                <tr>
+                <td>$:(fly['Label'])</td>
             <td>$:(fly['Short Identifier'])</td>
             <td>$:(fly['Genotype'])</td>
             <td>$:(fly['X'])</td>
