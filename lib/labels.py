@@ -18,6 +18,7 @@ def replace_latex_cmd_chars(string):
            # (' ', '\\_'), do not replace spaces
            ('{', '\\{ '),
            ('}', '\\} '),
+           ('^', '\\textasciicircum '),
            ('$', '\\textdollar '), ]
     for c, lc in CC:
         string = string.replace(c, lc)
