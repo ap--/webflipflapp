@@ -1,5 +1,20 @@
 
-.DEFAULT: all
+.DEFAULT: meremember
+
+.PHONY: meremember
+meremember:
+	@echo "targets:"
+	@echo "  switching clientsecrets"
+	@echo "   > local"
+	@echo "   > gae"
+	@echo "  setup css and js"
+	@echo "   > css"
+	@echo "   > js"
+	@echo "   > footable"
+	@echo "  install python libs"
+	@echo "   > libs"
+	@echo "  generate templates"
+	@echo "   > templates"
 
 all: libs css js footable templates
 
