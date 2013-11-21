@@ -115,3 +115,11 @@ templates:
 	python $(LIB)/web/template.py --compile ./templates
 
 
+#------------------------------------------------------------------------------
+# DOWNLOAD appengine SDK
+#
+.PHONY: downloadgaesdk
+downloadgaesdk:
+	wget http://googleappengine.googlecode.com/files/google_appengine_1.8.8.zip
+
+
