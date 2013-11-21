@@ -24,7 +24,7 @@ CSSDESTFILES = $(patsubst $(CSSSRC)/%.css, $(CSSDEST)/%.min.css, $(CSSSRCFILES))
 css: $(CSSDESTFILES)
 
 $(CSSDEST)/%.min.css: $(CSSSRC)/%.css
-	curl -0 -X POST -s --data-urlencode "input@$<" http://cssminifier.com/raw > $@
+	yui-compressor $< -o $@
 
 #------------------------------------------------------------------------------
 # CREATE minified JS
@@ -38,7 +38,7 @@ JSDESTFILES = $(patsubst $(JSSRC)/%.js, $(JSDEST)/%.min.js, $(JSSRCFILES))
 js: $(JSDESTFILES)
 
 $(JSDEST)/%.min.js: $(JSSRC)/%.js
-	curl -0 -X POST -s --data-urlencode "input@$<" http://cssminifier.com/raw > $@
+	yui-compressor $< -o $@
 
 #------------------------------------------------------------------------------
 # DOWNLOAD FOOTABLE
