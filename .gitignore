@@ -1,12 +1,10 @@
 *.pyc
 *.min.css
 *.min.js
-
 client_secrets.json*
-
+templates/__init__.py
 static/css
 static/js
-templates/__init__.py	
 lib/web
 lib/gdata
 lib/atom
