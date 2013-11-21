@@ -1,5 +1,8 @@
 *.pyc
 *.min.css
 *.min.js
+client_secrets.json*
 
+static/css
+static/js
 templates/__init__.py
