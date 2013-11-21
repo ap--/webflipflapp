@@ -1,8 +1,18 @@
 *.pyc
 *.min.css
 *.min.js
+
 client_secrets.json*
 
 static/css
 static/js
-templates/__init__.py
+templates/__init__.py	
+lib/web
+lib/gdata
+lib/atom
+lib/requests
+lib/apiclient
+lib/httplib2
+lib/oauth2client
+lib/uritemplate
+
