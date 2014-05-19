@@ -144,7 +144,7 @@ def get_tex(flies, skip=0, template='a4', repeats=1):
     LABELS = []
     for fly in flies:
         fields = row2fields(fly, SELECT, OVERRIDE)
-        LABELS.extent( [label(fields)]*repeats )
+        LABELS.extend( [label(fields)]*repeats )
 
     return "\n".join( TEMPLATE_START + (TEMPLATE_SKIP*skip) + LABELS + TEMPLATE_STOP ) 
 
