@@ -1,6 +1,8 @@
 
 import StringIO
 import csv
+import xlrd
+import itertools
 
 class YX(object):
     def __init__(self, y, x):
@@ -21,14 +23,16 @@ class Fakecell(object):
 
 
 def fakecellfeed_from_ssid(ssid, http):
-    URL = "https://docs.google.com/feeds/download/spreadsheets/Export?key=%s&exportFormat=csv"
+    URL = "https://docs.google.com/spreadsheets/d/%s/export?format=xlsx&id=%s"
     resp, content = http.request(URL % ssid)
     f = StringIO.StringIO(content)
-    reader = csv.reader(f)
+    xls_spreadsheet = xlrd.open_workbook(f)
+    sheet = xls_spreadsheet.sheet_by_index(0)
+    ROWS = sheet.nrows
+    COLS = sheet.ncols
     CCC = []
-    for y,row in enumerate(reader):
-        for x,cell in enumerate(row):
-            #yield Fakecell(y,x,cell)
-            if len(cell) > 0:
-                CCC.append(Fakecell(y+1,x+1,cell, ssid, 0))
+    for y, x in itertools.product(range(ROWS), range(COLS)):
+        cell = sheet.cell(y, x)
+        if len(cell.value) > 0:
+            CCC.append(Fakecell(y+1,x+1, cell.value, ssid, 0))
     return CCC
