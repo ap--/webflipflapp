@@ -24,7 +24,7 @@ class Fakecell(object):
 
 def fakecellfeed_from_ssid(ssid, http):
     URL = "https://docs.google.com/spreadsheets/d/%s/export?format=xlsx&id=%s"
-    resp, content = http.request(URL % ssid)
+    resp, content = http.request(URL % (ssid, ssid))
     f = StringIO.StringIO(content)
     xls_spreadsheet = xlrd.open_workbook(f)
     sheet = xls_spreadsheet.sheet_by_index(0)
