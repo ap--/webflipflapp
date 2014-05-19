@@ -32,6 +32,10 @@ def fakecellfeed_from_ssid(ssid, http):
     CCC = []
     for y, x in itertools.product(range(ROWS), range(COLS)):
         cell = sheet.cell(y, x)
-        if len(cell.value) > 0:
-            CCC.append(Fakecell(y+1,x+1, cell.value, ssid, 0))
+        try:
+            cv = str(cell.value)
+        except:
+            cv = ''
+        if len(cv) > 0:
+            CCC.append(Fakecell(y+1,x+1, cv, ssid, 0))
     return CCC

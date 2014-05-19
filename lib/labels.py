@@ -126,7 +126,7 @@ TEMPLATE_STOP = ["\n\\end{document}"]
  
 
 
-def get_tex(flies, skip=0, template='a4'):
+def get_tex(flies, skip=0, template='a4', repeats=1):
 
     if template == 'us':
         TEMPLATE_START = TEMPLATE_US_START
@@ -136,17 +136,22 @@ def get_tex(flies, skip=0, template='a4'):
     SELECT = { 0 : 'Label', 1 : None, 2 : 'Short Identifier', 3 : 'Genotype', 4 : None}
     OVERRIDE = ( None, None, None, None, datetime.datetime.now().strftime('%Y-%m-%d') )
 
+    try:
+        repeats = max(min(100, repeats), 1)
+    except:
+        repeats = 1
+
     LABELS = []
     for fly in flies:
         fields = row2fields(fly, SELECT, OVERRIDE)
-        LABELS.append( label(fields) )
+        LABELS.extent( [label(fields)]*repeats )
 
     return "\n".join( TEMPLATE_START + (TEMPLATE_SKIP*skip) + LABELS + TEMPLATE_STOP ) 
 
 
-def pdflink(flies, out=None, dpi=600, skip=0, template='a4'):
+def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1):
     URL = 'http://sciencesoft.at/image/latexurl/%s' % out
-    tex = get_tex(flies, skip=int(skip), template=template)
+    tex = get_tex(flies, skip=int(skip), template=template, repeats=repeats)
     try:
         tex = unicode(tex, 'utf-8')
     except:

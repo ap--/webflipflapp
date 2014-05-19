@@ -307,6 +307,12 @@ class PdfLabels(FakeWebapp2RequestHandler):
             skip = int(web.input(skip=0).skip)
         except:
             skip = 0
+        try:
+            repeats = int(web.input(repeats=1).repeats)
+        except:
+            repeats = 1
+        else:
+            repeats = max(min(100, repeats), 1)
         user = users.get_current_user()
         ud = get_userdata(user)
         try:
@@ -314,7 +320,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
         except:
             ps = 'a4'
         flies = json.loads(tabledata)
-        URL, OPTIONS = labels.pdflink(flies, skip=skip, template=ps)
+        URL, OPTIONS = labels.pdflink(flies, skip=skip, template=ps, repeats=repeats)
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
