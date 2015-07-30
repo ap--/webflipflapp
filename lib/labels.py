@@ -150,7 +150,6 @@ def get_tex(flies, skip=0, template='a4', repeats=1):
 
 
 def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1):
-    URL = 'http://sciencesoft.at/image/latexurl/%s' % out
     tex = get_tex(flies, skip=int(skip), template=template, repeats=repeats)
     try:
         tex = unicode(tex, 'utf-8')
@@ -168,5 +167,6 @@ def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1):
     if out is None:
         CHARS = string.ascii_uppercase + string.digits
         out = "LABELS_%s.pdf" % "".join( random.choice(CHARS) for _ in range(6) )
+    URL = 'http://sciencesoft.at/image/latexurl/%s' % out
     return URL, OPTIONS
     

@@ -78,7 +78,7 @@ def get_userdata(user):
     userdata_k = db.Key.from_path('UserData', user.user_id())
     userdata = db.get(userdata_k)
     if userdata is None:
-        userdata = UserData(key_name=user.user_id(), 
+        userdata = UserData(key_name=user.user_id(),
                         spreadsheet_id='', spreadsheet_name='no spreadsheet',
                         calendar_id='', calendar_name='no calendar',
                         labelpagesize='a4')
@@ -155,7 +155,7 @@ class Config(FakeWebapp2RequestHandler):
         ud = get_userdata(user)
         info = get_header_info(user, decorator)
         http = decorator.http()
-        
+
         # check spreadsheets
         tree = GoogleDrive.folder_structure(http=http, fields='items(iconLink)')
         spreadsheets = web.input(spreadsheets=[]).spreadsheets
@@ -169,7 +169,7 @@ class Config(FakeWebapp2RequestHandler):
                 names.append(name)
             else:
                 invalid.append(name)
-                
+
         if (not invalid) and spreadsheets:
             ud.set_spreadsheet(",".join(spreadsheets), ",".join(names))
 
@@ -181,7 +181,7 @@ class Config(FakeWebapp2RequestHandler):
         for selected in calendars:
             name = next(c['summary'] for c in cldr if c['id']==selected)
             names.append(name)
-        
+
         if calendars:
             ud.set_calendar(",".join(calendars), ",".join(names))
 
@@ -194,7 +194,6 @@ class Config(FakeWebapp2RequestHandler):
                 ud.set_labelpagesize("a4")
         else:
             ud.set_labelpagesize(pagesize)
-
 
         # select tabs
         tab = web.input(tab="tab1").tab
@@ -296,7 +295,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
-        
+
         web.header('Content-Type','application/pdf')
         return r.content
 
