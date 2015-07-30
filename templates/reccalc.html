@@ -1,0 +1,332 @@
+$def with (info)
+
+$# set all statically loaded files for this template
+$var cssfiles:
+$var jsfiles: 
+$var title: webFlipFlapp
+$var login_link: $info['login_url']
+$var auth_link: $info['auth_url']
+$var logout_link: $info['logout_url']
+$var user_email: $info['email']
+$var nickname: $info['nickname']
+$var has_cred: $info['has_cred']
+$var page: tools
+
+<div class="container">
+
+<h3>Recombination Calculator</h3>
+
+<p>This information is supplied without liability.</p>
+
+<form class='form-inline'>
+  <fieldset>
+    <legend>Chromosome X</legend>
+    <label>Landing Sites</label>
+    <select id="cxls1" onchange="getcm('x')">
+        <option value="[61.166835163030804, 61.43374133569419]">attP3</option>
+        <option value="[43.95243888270361, 44.49698361293996]">attP4</option>
+        <option value="[15.298115582972148, 16.02795522782657]">attP18</option>
+        <option value="[2.843721351517173, 3.18808750396152]">su(HW)attP7</option>
+        <option value="[26.492169846981582, 27.26442072388235]">su(HW)attP8</option>
+        <option value="[61.63206247992981, 62.03185191599892]">VK00006</option>
+        <option value="[12.066267162365868, 12.309898150945102]">VK00038</option>
+        <option value="[53.47863936357545, 53.749676621441]">ZH-14F</option>
+        <option value="[-0.0447216899, -0.0447216899]">ZH-1E</option>
+        <option value="[62.1830774098, 62.1830774098]">ZH-20C</option>
+        <option value="[0.03350988483074713, 0.23439901580573164]">ZH-2A</option>
+        <option value="[2.035691390794704, 2.843718884752067]">ZH-3Aa</option>
+        <option value="[2.035691390794704, 2.843718884752067]">ZH-3Ab</option>
+        <option value="[2.843721351517173, 3.18808750396152]">ZH-3B</option>
+        <option value="[12.986083729751343, 13.869274084784198]">ZH-5D</option>
+        <option value="[16.345884232755207, 16.995692353023422]">ZH-6E</option>
+    </select>
+    <select id="cxls2" onchange="getcm('x')">
+        <option value="[61.166835163030804, 61.43374133569419]">attP3</option>
+        <option value="[43.95243888270361, 44.49698361293996]">attP4</option>
+        <option value="[15.298115582972148, 16.02795522782657]">attP18</option>
+        <option value="[2.843721351517173, 3.18808750396152]">su(HW)attP7</option>
+        <option value="[26.492169846981582, 27.26442072388235]">su(HW)attP8</option>
+        <option value="[61.63206247992981, 62.03185191599892]">VK00006</option>
+        <option value="[12.066267162365868, 12.309898150945102]">VK00038</option>
+        <option value="[53.47863936357545, 53.749676621441]">ZH-14F</option>
+        <option value="[-0.0447216899, -0.0447216899]">ZH-1E</option>
+        <option value="[62.1830774098, 62.1830774098]">ZH-20C</option>
+        <option value="[0.03350988483074713, 0.23439901580573164]">ZH-2A</option>
+        <option value="[2.035691390794704, 2.843718884752067]">ZH-3Aa</option>
+        <option value="[2.035691390794704, 2.843718884752067]">ZH-3Ab</option>
+        <option value="[2.843721351517173, 3.18808750396152]">ZH-3B</option>
+        <option value="[12.986083729751343, 13.869274084784198]">ZH-5D</option>
+        <option value="[16.345884232755207, 16.995692353023422]">ZH-6E</option>
+    </select>
+    <label id='csxres'>... select two landingsites</label>
+  </fieldset>
+</form>
+
+
+
+<form class='form-inline'>
+  <fieldset>
+    <legend>Chromosome 2</legend>
+    <label>LandingSites</label>
+    <select id="c2ls1" onchange="getcm(2)">
+    <option value="[87.82745600210522, 88.48135195714791]">attP1</option>
+    <option value="[53.02730927913243, 53.51334512096402]">attP14</option>
+    <option value="[77.30585959053869, 78.5158717550087]">attP16</option>
+    <option value="[57.84351906247445, 58.03714262911267]">attP22</option>
+    <option value="[-0.1322507858, 1.4805590659321406]">attP29</option>
+    <option value="[28.74508885844148, 29.010515312766245]">attP30</option>
+    <option value="[65.6886969402701, 65.92913081310843]">attP32</option>
+    <option value="[67.83617900305828, 68.26957085973466]">attP33</option>
+    <option value="[15.276133486437812, 16.087543555257618]">attP40</option>
+    <option value="[54.8665368401, 54.8665368401]">attP83</option>
+    <option value="[70.259708813727, 70.58470924845211]">su(HW)attP5</option>
+    <option value="[9.671966853680356, 10.184337971373647]">su(HW)attP6</option>
+    <option value="[62.29109357938808, 62.54889715346771]">VIE-19a</option>
+    <option value="[54.8665368401, 54.8665368401]">VIE-260b</option>
+    <option value="[102.36411689208742, 103.3586246136118]">VK00001</option>
+    <option value="[27.445890184834084, 27.875974327209313]">VK00002</option>
+    <option value="[35.62897192734352, 36.03755324890437]">VK00003a</option>
+    <option value="[54.8665368401, 54.8665368401]">VK00003b</option>
+    <option value="[67.08474670336612, 67.83617593545986]">VK00008</option>
+    <option value="[54.8665368401, 54.8665368401]">VK00011</option>
+    <option value="[13.466282363715727, 14.641331067259246]">VK00012</option>
+    <option value="[55.56822867550312, 55.64929991940816]">VK00014</option>
+    <option value="[60.596663972746086, 60.99191149539504]">VK00016</option>
+    <option value="[77.13159621612292, 77.30585598070329]">VK00018</option>
+    <option value="[96.75771056837655, 97.51726448262576]">VK00022</option>
+    <option value="[69.76127043572212, 70.25970556165518]">VK00030</option>
+    <option value="[2.2101509193664106, 3.3758983080876717]">VK00037</option>
+    <option value="[1.480562061669065, 2.2101478429127233]">ZH-21F</option>
+    <option value="[2.2101509193664106, 3.3758983080876717]">ZH-22A</option>
+    <option value="[24.314890926827815, 24.98744194189521]">ZH-27F</option>
+    <option value="[31.388182220148504, 32.56092933641485]">ZH-30A</option>
+    <option value="[32.560933192994035, 33.43433565954405]">ZH-30B</option>
+    <option value="[38.401035486000275, 38.73146504987568]">ZH-32C</option>
+    <option value="[48.96059026784218, 50.574783397050986]">ZH-35B</option>
+    <option value="[53.513346398043744, 53.902507801011836]">ZH-36B</option>
+    <option value="[54.8665368401, 54.8665368401]">ZH-38D</option>
+    <option value="[57.02971752684281, 57.30599080649002]">ZH-44F</option>
+    <option value="[57.30599221942572, 57.54975560360618]">ZH-45A</option>
+    <option value="[58.325192835571286, 58.45376839841584]">ZH-46A</option>
+    <option value="[58.952267781336396, 59.08818725075493]">ZH-46D</option>
+    <option value="[64.92634911761887, 65.37652305000844]">ZH-49B</option>
+    <option value="[68.26957396319432, 69.30972886019362]">ZH-50C</option>
+    <option value="[71.63785891292542, 72.18948815458043]">ZH-51C</option>
+    <option value="[72.18949152845116, 72.94083384272521]">ZH-51D</option>
+    <option value="[76.26050689386484, 76.64455208043596]">ZH-52E</option>
+    <option value="[97.51726809535509, 98.30728997995786]">ZH-58A</option>
+    <option value="[102.36411689208742, 103.3586246136118]">ZH-59D</option>
+    <option value="[107.54394166635448, 108.218108657]">ZH-60E</option>
+    </select>
+    <select id="c2ls2" onchange="getcm(2)">
+    <option value="[87.82745600210522, 88.48135195714791]">attP1</option>
+    <option value="[53.02730927913243, 53.51334512096402]">attP14</option>
+    <option value="[77.30585959053869, 78.5158717550087]">attP16</option>
+    <option value="[57.84351906247445, 58.03714262911267]">attP22</option>
+    <option value="[-0.1322507858, 1.4805590659321406]">attP29</option>
+    <option value="[28.74508885844148, 29.010515312766245]">attP30</option>
+    <option value="[65.6886969402701, 65.92913081310843]">attP32</option>
+    <option value="[67.83617900305828, 68.26957085973466]">attP33</option>
+    <option value="[15.276133486437812, 16.087543555257618]">attP40</option>
+    <option value="[54.8665368401, 54.8665368401]">attP83</option>
+    <option value="[70.259708813727, 70.58470924845211]">su(HW)attP5</option>
+    <option value="[9.671966853680356, 10.184337971373647]">su(HW)attP6</option>
+    <option value="[62.29109357938808, 62.54889715346771]">VIE-19a</option>
+    <option value="[54.8665368401, 54.8665368401]">VIE-260b</option>
+    <option value="[102.36411689208742, 103.3586246136118]">VK00001</option>
+    <option value="[27.445890184834084, 27.875974327209313]">VK00002</option>
+    <option value="[35.62897192734352, 36.03755324890437]">VK00003a</option>
+    <option value="[54.8665368401, 54.8665368401]">VK00003b</option>
+    <option value="[67.08474670336612, 67.83617593545986]">VK00008</option>
+    <option value="[54.8665368401, 54.8665368401]">VK00011</option>
+    <option value="[13.466282363715727, 14.641331067259246]">VK00012</option>
+    <option value="[55.56822867550312, 55.64929991940816]">VK00014</option>
+    <option value="[60.596663972746086, 60.99191149539504]">VK00016</option>
+    <option value="[77.13159621612292, 77.30585598070329]">VK00018</option>
+    <option value="[96.75771056837655, 97.51726448262576]">VK00022</option>
+    <option value="[69.76127043572212, 70.25970556165518]">VK00030</option>
+    <option value="[2.2101509193664106, 3.3758983080876717]">VK00037</option>
+    <option value="[1.480562061669065, 2.2101478429127233]">ZH-21F</option>
+    <option value="[2.2101509193664106, 3.3758983080876717]">ZH-22A</option>
+    <option value="[24.314890926827815, 24.98744194189521]">ZH-27F</option>
+    <option value="[31.388182220148504, 32.56092933641485]">ZH-30A</option>
+    <option value="[32.560933192994035, 33.43433565954405]">ZH-30B</option>
+    <option value="[38.401035486000275, 38.73146504987568]">ZH-32C</option>
+    <option value="[48.96059026784218, 50.574783397050986]">ZH-35B</option>
+    <option value="[53.513346398043744, 53.902507801011836]">ZH-36B</option>
+    <option value="[54.8665368401, 54.8665368401]">ZH-38D</option>
+    <option value="[57.02971752684281, 57.30599080649002]">ZH-44F</option>
+    <option value="[57.30599221942572, 57.54975560360618]">ZH-45A</option>
+    <option value="[58.325192835571286, 58.45376839841584]">ZH-46A</option>
+    <option value="[58.952267781336396, 59.08818725075493]">ZH-46D</option>
+    <option value="[64.92634911761887, 65.37652305000844]">ZH-49B</option>
+    <option value="[68.26957396319432, 69.30972886019362]">ZH-50C</option>
+    <option value="[71.63785891292542, 72.18948815458043]">ZH-51C</option>
+    <option value="[72.18949152845116, 72.94083384272521]">ZH-51D</option>
+    <option value="[76.26050689386484, 76.64455208043596]">ZH-52E</option>
+    <option value="[97.51726809535509, 98.30728997995786]">ZH-58A</option>
+    <option value="[102.36411689208742, 103.3586246136118]">ZH-59D</option>
+    <option value="[107.54394166635448, 108.218108657]">ZH-60E</option>
+    </select>
+    <label id='cs2res'>... select two landingsites</label>
+  </fieldset>
+</form>
+
+
+
+<form class='form-inline'>
+  <fieldset>
+    <legend>Chromosome 3</legend>
+    <label>LandingSites</label>
+    <select id="c3ls1" onchange="getcm(3)">
+    <option value="[32.94155207676135, 33.58656507885014]">attP2</option>
+    <option value="[58.25890971868357, 59.6111429873178]">attP52</option>
+    <option value="[58.25890971868357, 59.6111429873178]">attP64</option>
+    <option value="[9.789786836495175, 11.011779590008635]">attP88</option>
+    <option value="[33.81682055341063, 34.86007358440299]">attP112</option>
+    <option value="[90.42348085660863, 91.4267999004881]">attP154</option>
+    <option value="[50.62312428511619, 51.21295272265381]">su(HW)attP1</option>
+    <option value="[69.43265158479794, 69.9230259507621]">su(HW)attP2</option>
+    <option value="[31.066139527816404, 32.41659612595322]">su(HW)attP4</option>
+    <option value="[78.86456966085943, 79.66297778276808]">VIE-49b</option>
+    <option value="[98.68061048586915, 99.55595278360869]">VIE-57b</option>
+    <option value="[46.35253491406162, 46.46905916320275]">VK00005</option>
+    <option value="[47.6000334686, 47.6000334686]">VK00007</option>
+    <option value="[46.7690061718, 46.7690061718]">VK00013</option>
+    <option value="[34.86007634180376, 35.32436915973384]">VK00019</option>
+    <option value="[101.0869018837885, 101.83558446787623]">VK00020</option>
+    <option value="[46.7690061718, 46.7690061718]">VK00021</option>
+    <option value="[38.61905477101546, 39.40174986151489]">VK00023</option>
+    <option value="[87.1928251591046, 88.44737636534776]">VK00026</option>
+    <option value="[60.015969470330106, 61.01536072724304]">VK00027</option>
+    <option value="[70.73270630347682, 71.55770025573409]">VK00028</option>
+    <option value="[4.581371012326542, 5.533928930999055]">VK00031</option>
+    <option value="[47.39349848229803, 47.4965628733755]">VK00032</option>
+    <option value="[18.08544601048972, 18.96662699992588]">VK00033</option>
+    <option value="[39.74070615933331, 40.79718387551409]">VK00036</option>
+    <option value="[31.066139527816404, 32.41659612595322]">VK00039</option>
+    <option value="[50.62312428511619, 51.21295272265381]">VK00040</option>
+    <option value="[2.3801851755228545, 3.2491763595528176]">ZH-62B</option>
+    <option value="[9.789786836495175, 11.011779590008635]">ZH-64A</option>
+    <option value="[28.695146423220024, 29.68714711112508]">ZH-67C</option>
+    <option value="[35.32437187889603, 35.82896491895649]">ZH-68E</option>
+    <option value="[39.74070615933331, 40.79718387551409]">ZH-70C</option>
+    <option value="[46.46905971003838, 46.62135031741192]">ZH-75C</option>
+    <option value="[46.62135071597454, 46.715594964304216]">ZH-75D</option>
+    <option value="[47.6000334686, 47.6000334686]">ZH-82F</option>
+    <option value="[47.6000334686, 47.6000334686]">ZH-83A</option>
+    <option value="[47.6000334686, 47.6000334686]">ZH-83D</option>
+    <option value="[47.679786680473136, 47.907439473530076]">ZH-85D</option>
+    <option value="[47.90744011659557, 48.1218326951945]">ZH-85Ea</option>
+    <option value="[47.90744011659557, 48.1218326951945]">ZH-85Eb</option>
+    <option value="[48.121833445698655, 48.35712828028475]">ZH-85F</option>
+    <option value="[49.15691486995965, 49.47169096398475]">ZH-86Da</option>
+    <option value="[49.15691486995965, 49.47169096398475]">ZH-86Db</option>
+    <option value="[49.15691486995965, 49.47169096398475]">ZH-86Dc</option>
+    <option value="[50.11338472694783, 50.231295954646335]">ZH-86Fa</option>
+    <option value="[50.11338472694783, 50.231295954646335]">ZH-86Fb</option>
+    <option value="[52.25826536039261, 52.83127037740071]">ZH-87E</option>
+    <option value="[53.504860468637915, 54.259563557972704]">ZH-88A</option>
+    <option value="[60.015969470330106, 61.01536072724304]">ZH-89E</option>
+    <option value="[64.61283587133893, 65.25162088052652]">ZH-91B</option>
+    <option value="[66.95076809780045, 68.23075043351596]">ZH-92Aa</option>
+    <option value="[66.95076809780045, 68.23075043351596]">ZH-92Ab</option>
+    <option value="[72.91336560091617, 73.43676508479996]">ZH-93D</option>
+    <option value="[77.94580104636954, 78.86456646022208]">ZH-94D</option>
+    <option value="[86.32432316925782, 87.19282197398883]">ZH-96E</option>
+    </select>
+    <select id="c3ls2" onchange="getcm(3)">
+    <option value="[32.94155207676135, 33.58656507885014]">attP2</option>
+    <option value="[58.25890971868357, 59.6111429873178]">attP52</option>
+    <option value="[58.25890971868357, 59.6111429873178]">attP64</option>
+    <option value="[9.789786836495175, 11.011779590008635]">attP88</option>
+    <option value="[33.81682055341063, 34.86007358440299]">attP112</option>
+    <option value="[90.42348085660863, 91.4267999004881]">attP154</option>
+    <option value="[50.62312428511619, 51.21295272265381]">su(HW)attP1</option>
+    <option value="[69.43265158479794, 69.9230259507621]">su(HW)attP2</option>
+    <option value="[31.066139527816404, 32.41659612595322]">su(HW)attP4</option>
+    <option value="[78.86456966085943, 79.66297778276808]">VIE-49b</option>
+    <option value="[98.68061048586915, 99.55595278360869]">VIE-57b</option>
+    <option value="[46.35253491406162, 46.46905916320275]">VK00005</option>
+    <option value="[47.6000334686, 47.6000334686]">VK00007</option>
+    <option value="[46.7690061718, 46.7690061718]">VK00013</option>
+    <option value="[34.86007634180376, 35.32436915973384]">VK00019</option>
+    <option value="[101.0869018837885, 101.83558446787623]">VK00020</option>
+    <option value="[46.7690061718, 46.7690061718]">VK00021</option>
+    <option value="[38.61905477101546, 39.40174986151489]">VK00023</option>
+    <option value="[87.1928251591046, 88.44737636534776]">VK00026</option>
+    <option value="[60.015969470330106, 61.01536072724304]">VK00027</option>
+    <option value="[70.73270630347682, 71.55770025573409]">VK00028</option>
+    <option value="[4.581371012326542, 5.533928930999055]">VK00031</option>
+    <option value="[47.39349848229803, 47.4965628733755]">VK00032</option>
+    <option value="[18.08544601048972, 18.96662699992588]">VK00033</option>
+    <option value="[39.74070615933331, 40.79718387551409]">VK00036</option>
+    <option value="[31.066139527816404, 32.41659612595322]">VK00039</option>
+    <option value="[50.62312428511619, 51.21295272265381]">VK00040</option>
+    <option value="[2.3801851755228545, 3.2491763595528176]">ZH-62B</option>
+    <option value="[9.789786836495175, 11.011779590008635]">ZH-64A</option>
+    <option value="[28.695146423220024, 29.68714711112508]">ZH-67C</option>
+    <option value="[35.32437187889603, 35.82896491895649]">ZH-68E</option>
+    <option value="[39.74070615933331, 40.79718387551409]">ZH-70C</option>
+    <option value="[46.46905971003838, 46.62135031741192]">ZH-75C</option>
+    <option value="[46.62135071597454, 46.715594964304216]">ZH-75D</option>
+    <option value="[47.6000334686, 47.6000334686]">ZH-82F</option>
+    <option value="[47.6000334686, 47.6000334686]">ZH-83A</option>
+    <option value="[47.6000334686, 47.6000334686]">ZH-83D</option>
+    <option value="[47.679786680473136, 47.907439473530076]">ZH-85D</option>
+    <option value="[47.90744011659557, 48.1218326951945]">ZH-85Ea</option>
+    <option value="[47.90744011659557, 48.1218326951945]">ZH-85Eb</option>
+    <option value="[48.121833445698655, 48.35712828028475]">ZH-85F</option>
+    <option value="[49.15691486995965, 49.47169096398475]">ZH-86Da</option>
+    <option value="[49.15691486995965, 49.47169096398475]">ZH-86Db</option>
+    <option value="[49.15691486995965, 49.47169096398475]">ZH-86Dc</option>
+    <option value="[50.11338472694783, 50.231295954646335]">ZH-86Fa</option>
+    <option value="[50.11338472694783, 50.231295954646335]">ZH-86Fb</option>
+    <option value="[52.25826536039261, 52.83127037740071]">ZH-87E</option>
+    <option value="[53.504860468637915, 54.259563557972704]">ZH-88A</option>
+    <option value="[60.015969470330106, 61.01536072724304]">ZH-89E</option>
+    <option value="[64.61283587133893, 65.25162088052652]">ZH-91B</option>
+    <option value="[66.95076809780045, 68.23075043351596]">ZH-92Aa</option>
+    <option value="[66.95076809780045, 68.23075043351596]">ZH-92Ab</option>
+    <option value="[72.91336560091617, 73.43676508479996]">ZH-93D</option>
+    <option value="[77.94580104636954, 78.86456646022208]">ZH-94D</option>
+    <option value="[86.32432316925782, 87.19282197398883]">ZH-96E</option>
+    </select>
+    <label id='cs3res'>... select two landingsites</label>
+  </fieldset>
+</form>
+
+
+
+</div>
+
+<script type='text/javascript'>
+function getcm(cid){
+    var e1 = document.getElementById("c"+cid+"ls1");
+    var s1 = e1.options[e1.selectedIndex].value;
+    var e2 = document.getElementById("c"+cid+"ls2");
+    var s2 = e2.options[e2.selectedIndex].value;
+
+    if (e1.selectedIndex == e2.selectedIndex) {
+        document.getElementById("cs"+cid+"res").innerHTML = "Can't recombine. Same landing site.";
+    } else {
+        cm1 = JSON.parse(s1);
+        cm2 = JSON.parse(s2);
+        ra = Math.abs(cm1[0] - cm2[1]);
+        rb = Math.abs(cm1[1] - cm2[0]);
+        if (ra > rb) {
+            r0 = rb;
+            r1 = ra;
+        } else {
+            r0 = ra;
+            r1 = rb;
+        }
+        if (r1 > 50.) {
+            document.getElementById("cs"+cid+"res").innerHTML = "Maximum recombination probability! (50%)";
+        } else {
+            document.getElementById("cs"+cid+"res").innerHTML = "Recombination probability "
+                                   + r0.toFixed(2) + "% - " + r1.toFixed(2) + "%.";
+        }
+    }
+}
+</script>

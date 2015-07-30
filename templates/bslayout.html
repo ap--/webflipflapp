@@ -3,6 +3,7 @@ $ active0 = 'class="active"' if content.page == 'config' else ''
 $ active1 = 'class="active"' if content.page == 'boxes' else ''
 $ active2 = 'class="active"' if content.page == 'flies' else ''
 $ active3 = 'class="active"' if content.page == 'help' else ''
+$ active4 = 'class="active"' if content.page == 'tools' else ''
 
 <!DOCTYPE html>
 <html lang="en">
@@ -45,6 +46,7 @@ $ active3 = 'class="active"' if content.page == 'help' else ''
               <li $:active0 ><a href="/config"><i class="icon-cogs"></i> Config</a></li>
               <li $:active1 ><a href="/boxes"><i class="icon-archive"></i> Boxes</a></li>
               <li $:active2 ><a href="/flies"><i class="icon-bug"></i> Flies</a></li>
+              <li $:active4 ><a href="/tools"><i class="icon-magic"></i> Tools</a></li>
               <li $:active3 ><a href="/help"><i class="icon-question-sign"></i> Help</a></li>
           </ul>
           <ul class="nav pull-right">

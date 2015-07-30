@@ -324,7 +324,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
-        
+
         web.header('Content-Type','application/pdf')
         return r.content
 
@@ -337,6 +337,31 @@ class Help(FakeWebapp2RequestHandler):
         user = users.get_current_user()
         info = get_header_info(user, decorator)
         return render.help(info)
+
+
+class Tools(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1822.2: Space, the final frontier')
+    @decorator.oauth_aware
+    def GET(self):
+        http = decorator.http()
+        user = users.get_current_user()
+        info = get_header_info(user, decorator)
+        return render.tools(info)
+
+
+class RecCalc(FakeWebapp2RequestHandler):
+    @printerrors('Stardate 1823.2: Space, the final frontier')
+    @decorator.oauth_aware
+    def GET(self):
+        recpw = web.input(recpw="").recpw
+        http = decorator.http()
+        user = users.get_current_user()
+        info = get_header_info(user, decorator)
+        if recpw == "fliege":
+            return render.reccalc(info)
+        else:
+            web.seeother('/tools')
+
 
 """
     The oauth2callback is done with the google-webapp stuff thats
@@ -353,6 +378,8 @@ urls = ( "/",            "Index",
          "/flies",       "Flies",
          "/flydata",     "FlyData",
          "/help",        "Help",
+         "/tools",       "Tools",
+         "/tools/reccalc",       "RecCalc",
        )
 
 appgae = web.application(urls, globals()).wsgifunc()
