@@ -5,6 +5,8 @@ import sys
 import datetime
 import string
 import random
+import requests
+import re
 
 def replace_latex_cmd_chars(string):
     CC = [ ('\\', '\\textbackslash '),
@@ -149,37 +151,90 @@ def get_tex(flies, skip=0, template='a4', repeats=1):
     return "\n".join( TEMPLATE_START + (TEMPLATE_SKIP*skip) + LABELS + TEMPLATE_STOP ) 
 
 
-def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1, provider="SCIENCESOFT.AT"):
+def create_output(flies, template='a4', provider="lp1", skip=0, repeats=1):
+    """Creates the output files requested by the user"""
     tex = get_tex(flies, skip=int(skip), template=template, repeats=repeats)
     try:
         tex = unicode(tex, 'utf-8')
     except:
         pass
-    # Different formatting for different providers
     if provider == "lp1":
-        # sciencesoft.at online latex compiler
-        OPTIONS = {'src' : tex,
-                   'dev' : 'pdfwrite',
-                   'papersize' : 'a4',
-                   'dpi' : dpi,
-                   'result' : 'false',
-                   'template' : 'no'}
-        if template == 'us':
-            OPTIONS['papersize'] = 'letter'
-
-        if out is None:
-            CHARS = string.ascii_uppercase + string.digits
-            out = "LABELS_%s.pdf" % "".join( random.choice(CHARS) for _ in range(6) )
-        URL = 'http://sciencesoft.at/image/latexurl/%s' % out
+        content_type, data = pdf_from_sciencesoft(tex, template)
     elif provider == "lp2":
-        # tex.mendelu.cz online latex compiler
-        OPTIONS = {'pole' : tex,
-                   'pdf' : 'PDF',
-                   'preklad' : 'latex',
-                   'pruchod' : 1,
-                   '.cgifields' : 'komprim'}
-        URL = 'https://tex.mendelu.cz/en/'
+        content_type, data = pdf_from_mendelu(tex)
+    elif provider == "lp3":
+        content_type, data = pdf_from_halle(tex)
+    elif provider == "lp4":
+        content_type, data = 'text/plain', tex
     else:
-        raise Exception("Latex provider not known: '%s'" % provider)
-    return URL, OPTIONS
-    
+        raise Exception("Unknown latex compiler '%s'" % provider)
+    return content_type, data
+
+def pdf_from_sciencesoft(tex, template):
+    # sciencesoft.at online latex compiler
+    OPTIONS = {'src' : tex,
+               'dev' : 'pdfwrite',
+               'papersize' : 'a4',
+               'dpi' : 600,
+               'result' : 'false',
+               'template' : 'no'}
+    if template == 'us':
+        OPTIONS['papersize'] = 'letter'
+    CHARS = string.ascii_uppercase + string.digits
+    out = "LABELS_%s.pdf" % "".join( random.choice(CHARS) for _ in range(6) )
+
+    URL = 'http://sciencesoft.at/image/latexurl/%s' % out
+
+    r = requests.post(URL, data=OPTIONS)
+    r.raise_for_status()
+    return "application/pdf", r.content
+
+
+def pdf_from_mendelu(tex):
+    # tex.mendelu.cz online latex compiler
+    OPTIONS = {'pole' : tex,
+               'pdf' : 'PDF',
+               'preklad' : 'latex',
+               'pruchod' : 1,
+               '.cgifields' : 'komprim'}
+    URL = 'https://tex.mendelu.cz/en/'
+
+    r = requests.post(URL, data=OPTIONS)
+    r.raise_for_status()
+    return "application/pdf", r.content
+
+
+def pdf_from_halle(tex):
+    # latex.informatik,uni-halle.de
+    URL = 'http://latex.informatik.uni-halle.de/latex-online/latex.php'
+
+    # get a new id from the website
+    r = requests.get(URL)
+    r.raise_for_status()
+    iddata = r.content
+    myid = re.findall('name="id" value="(.*)"', iddata)[0]
+
+    # request to compile the pdf
+    OPTIONS = {'quellcode' : tex,
+               'id' : myid,
+               'spw' : 1,
+               'finit': 'nothing',
+               'aformat' : 'PDF',
+               'compile' : u'\u00DCbersetzen'}
+    r = requests.post(URL, data=OPTIONS)
+    r.raise_for_status()
+
+    # download the created pdf
+    PDFURL = "http://latex.informatik.uni-halle.de/latex-online/temp/olatex_%s.pdf" % myid
+    r = requests.get(PDFURL)
+    r.raise_for_status()
+    data = r.content
+
+    # cleanup temporary files
+    CLEANURL = 'http://latex.informatik.uni-halle.de/latex-online/aufraeumen.php'
+    OPTIONS = {'id' : myid,
+               'spw' : 1}
+    r = requests.post(CLEANURL, data=OPTIONS)
+    r.raise_for_status()
+
+    return "application/pdf", data

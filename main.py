@@ -312,13 +312,11 @@ class PdfLabels(FakeWebapp2RequestHandler):
                 continue
             flies.extend(box['flies'])
 
-        URL, OPTIONS = labels.pdflink(flies, template=ps, provider=lp)
+        # Give me my output!!!
+        content_type, data = labels.create_output(flies, template=ps, provider=lp)
 
-        r = requests.post(URL, data=OPTIONS)
-        r.raise_for_status()
-
-        web.header('Content-Type','application/pdf')
-        return r.content
+        web.header('Content-Type', content_type)
+        return data
 
     @printerrors('Stardate 1561.8: Humans are highly illogical')
     def POST(self):
@@ -344,13 +342,12 @@ class PdfLabels(FakeWebapp2RequestHandler):
         except:
             lp = 'lp1'
         flies = json.loads(tabledata)
-        URL, OPTIONS = labels.pdflink(flies, skip=skip, template=ps, repeats=repeats, provider=lp)
 
-        r = requests.post(URL, data=OPTIONS)
-        r.raise_for_status()
+        # Give me my output!!!
+        content_type, data = labels.create_output(flies, template=ps, provider=lp, skip=skip, repeats=repeats)
 
-        web.header('Content-Type','application/pdf')
-        return r.content
+        web.header('Content-Type', content_type)
+        return data
 
 
 class Help(FakeWebapp2RequestHandler):

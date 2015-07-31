@@ -18,6 +18,8 @@ $ lta4checked = "checked" if ud.labelpagesize == "a4" else ""
 $ ltuschecked = "checked" if ud.labelpagesize == "us" else ""
 $ lp1checked = "checked" if ud.labelprovider == "lp1" else ""
 $ lp2checked = "checked" if ud.labelprovider == "lp2" else ""
+$ lp3checked = "checked" if ud.labelprovider == "lp3" else ""
+$ lp4checked = "checked" if ud.labelprovider == "lp4" else ""
 
 $ tab1active = "active" if tab == "tab1" else ""
 $ tab2active = "active" if tab == "tab2" else ""
@@ -173,6 +175,14 @@ $if invalid:
             <label class="radio">
                 <input type='radio' name='provider' value="lp2" $(lp2checked)/>
                     tex.mendelu (creates A4 pdfs - the template size is still used)
+            </label>
+            <label class="radio">
+                <input type='radio' name='provider' value="lp3" $(lp3checked)/>
+                    latex.informatik.uni-halle (creates A4 pdfs - the template size is still used)
+            </label>
+            <label class="radio">
+                <input type='radio' name='provider' value="lp4" $(lp4checked)/>
+                    I compile it myself. Return the tex file (no pdf)
             </label>
           </div>
         </div>
