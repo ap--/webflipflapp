@@ -144,28 +144,38 @@ $if invalid:
       <div class="row">
         <div class="span12">
           <h3>Template selection</h3>
-          <p>Choose your favorite template type. And choose the pdf creator service.</p>
+          <p>Configure your labels.</p>
         </div>
       </div>
     
-      <form name='input' action="/config" method='get'>
-        <label class="radio">
-        <input type='radio' name='pagesize' value="a4" $(lta4checked)/>
-            Avery 3667, A4 label-paper
-        </label>
-        <label class="radio">
-        <input type='radio' name='pagesize' value="us" $(ltuschecked)/>
-            Avery 5155, US-letter label paper
-        </label>
-
-        <label class="radio">
-        <input type='radio' name='provider' value="lp1" $(lp1checked)/>
-            sciencesoft (default)
-        </label>
-        <label class="radio">
-        <input type='radio' name='provider' value="lp2" $(lp2checked)/>
-            tex.mendelu (creates A4 pdfs - the template size is still used)
-        </label>
+      <form class="form-horizontal" name='input' action="/config" method='get'>
+        
+        <div class="control-group">
+          <label class="control-label">template size</label>
+          <div class="controls">
+            <label class="radio">
+                <input type='radio' name='pagesize' value="a4" $(lta4checked)/>
+                    Avery 3667, A4 label-paper
+            </label>
+            <label class="radio">
+                <input type='radio' name='pagesize' value="us" $(ltuschecked)/>
+                    Avery 5155, US-letter label paper
+            </label>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">latex compiler</label>
+          <div class="controls">
+            <label class="radio">
+                <input type='radio' name='provider' value="lp1" $(lp1checked)/>
+                    sciencesoft (default)
+            </label>
+            <label class="radio">
+                <input type='radio' name='provider' value="lp2" $(lp2checked)/>
+                    tex.mendelu (creates A4 pdfs - the template size is still used)
+            </label>
+          </div>
+        </div>
 
         <input type="hidden" name="tab" value="tab3">
 

@@ -38,6 +38,9 @@ def webDEBUG(ob):
     web.header('Content-Type', 'text/plain')
     return pprint.pformat(ob)
 
+# XXXXXXXXXXXXXXXXX
+SHOW_ERRORS = False
+# XXXXXXXXXXXXXXXXX
 
 #--------------------------------------------------
 # Defining the database stuff for userdata storage
@@ -122,7 +125,7 @@ def printerrors(prefix):
                 return f(*args, **kwargs)
             except Exception as e:
                 sp = '%s\n%s\n' % (prefix, '~'*len(prefix))
-                if False:
+                if SHOW_ERRORS:
                     se = 'ERROR: %s\n' % str(e)
                     st = traceback.format_exc().strip().replace('\n', '\n> ')
                     web.header('Content-Type', 'text/plain')

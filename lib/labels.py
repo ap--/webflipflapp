@@ -171,7 +171,7 @@ def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1, provider
             CHARS = string.ascii_uppercase + string.digits
             out = "LABELS_%s.pdf" % "".join( random.choice(CHARS) for _ in range(6) )
         URL = 'http://sciencesoft.at/image/latexurl/%s' % out
-    elif provider == "tex.mendelu.cz":
+    elif provider == "lp2":
         # tex.mendelu.cz online latex compiler
         OPTIONS = {'pole' : tex,
                    'pdf' : 'PDF',
