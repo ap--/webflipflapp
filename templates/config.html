@@ -16,6 +16,8 @@ $ SSID = ud.spreadsheet_id.split(',')
 $ CLID = ud.calendar_id.split(',')
 $ lta4checked = "checked" if ud.labelpagesize == "a4" else ""
 $ ltuschecked = "checked" if ud.labelpagesize == "us" else ""
+$ lp1checked = "checked" if ud.labelprovider == "lp1" else ""
+$ lp2checked = "checked" if ud.labelprovider == "lp2" else ""
 
 $ tab1active = "active" if tab == "tab1" else ""
 $ tab2active = "active" if tab == "tab2" else ""
@@ -50,7 +52,7 @@ $if invalid:
       <a href="#tab2" data-toggle="tab">Calendars</a>
     </li>
     <li class="$tab3active">
-      <a href="#tab3" data-toggle="tab">Label template</a>
+      <a href="#tab3" data-toggle="tab">Label config</a>
     </li>
   </ul>
   <div class="tab-content">
@@ -142,7 +144,7 @@ $if invalid:
       <div class="row">
         <div class="span12">
           <h3>Template selection</h3>
-          <p>Choose your favorite template type.</p>
+          <p>Choose your favorite template type. And choose the pdf creator service.</p>
         </div>
       </div>
     
@@ -154,6 +156,15 @@ $if invalid:
         <label class="radio">
         <input type='radio' name='pagesize' value="us" $(ltuschecked)/>
             Avery 5155, US-letter label paper
+        </label>
+
+        <label class="radio">
+        <input type='radio' name='provider' value="lp1" $(lp1checked)/>
+            sciencesoft (default)
+        </label>
+        <label class="radio">
+        <input type='radio' name='provider' value="lp2" $(lp2checked)/>
+            tex.mendelu (creates A4 pdfs - the template size is still used)
         </label>
 
         <input type="hidden" name="tab" value="tab3">

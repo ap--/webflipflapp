@@ -1,5 +1,5 @@
 application: webflipflapp
-version: 1-4-39
+version: 1-4-40
 runtime: python27
 api_version: 1
 threadsafe: true

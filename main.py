@@ -49,6 +49,7 @@ class UserData(db.Model):
     calendar_id = db.StringProperty()
     calendar_name = db.StringProperty()
     labelpagesize = db.StringProperty()
+    labelprovider = db.StringProperty()
 
     def get_names(self):
         return self.spreadsheet_name, self.calendar_name
@@ -73,6 +74,9 @@ class UserData(db.Model):
         self.labelpagesize = size
         self.put()
 
+    def set_labelprovider(self, provider):
+        self.labelprovider = provider
+        self.put()
 
 def get_userdata(user):
     userdata_k = db.Key.from_path('UserData', user.user_id())
@@ -195,6 +199,16 @@ class Config(FakeWebapp2RequestHandler):
         else:
             ud.set_labelpagesize(pagesize)
 
+        # provider
+        provider = web.input(provider=None).provider
+        if provider is None:
+            try:
+                _ = ud.labelprovider
+            except:
+                ud.set_labelprovider("lp1")
+        else:
+            ud.set_labelprovider(provider)
+
         # select tabs
         tab = web.input(tab="tab1").tab
         return render.config(tree, cldr, ud, info, invalid, tab)
@@ -281,6 +295,10 @@ class PdfLabels(FakeWebapp2RequestHandler):
             ps = ud.labelpagesize
         except:
             ps = 'a4'
+        try:
+            lp = ud.labelprovider
+        except:
+            lp = 'lp1'
 
         http = decorator.http()
         cf = fakespreadsheets.fakecellfeed_from_ssid(ssid, http)
@@ -291,7 +309,7 @@ class PdfLabels(FakeWebapp2RequestHandler):
                 continue
             flies.extend(box['flies'])
 
-        URL, OPTIONS = labels.pdflink(flies, template=ps)
+        URL, OPTIONS = labels.pdflink(flies, template=ps, provider=lp)
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()
@@ -318,8 +336,12 @@ class PdfLabels(FakeWebapp2RequestHandler):
             ps = ud.labelpagesize
         except:
             ps = 'a4'
+        try:
+            lp = ud.labelprovider
+        except:
+            lp = 'lp1'
         flies = json.loads(tabledata)
-        URL, OPTIONS = labels.pdflink(flies, skip=skip, template=ps, repeats=repeats)
+        URL, OPTIONS = labels.pdflink(flies, skip=skip, template=ps, repeats=repeats, provider=lp)
 
         r = requests.post(URL, data=OPTIONS)
         r.raise_for_status()

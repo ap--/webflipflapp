@@ -149,24 +149,37 @@ def get_tex(flies, skip=0, template='a4', repeats=1):
     return "\n".join( TEMPLATE_START + (TEMPLATE_SKIP*skip) + LABELS + TEMPLATE_STOP ) 
 
 
-def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1):
+def pdflink(flies, out=None, dpi=600, skip=0, template='a4', repeats=1, provider="SCIENCESOFT.AT"):
     tex = get_tex(flies, skip=int(skip), template=template, repeats=repeats)
     try:
         tex = unicode(tex, 'utf-8')
     except:
         pass
-    OPTIONS = {'src' : tex,
-               'dev' : 'pdfwrite',
-               'papersize' : 'a4',
-               'dpi' : dpi,
-               'result' : 'false',
-               'template' : 'no'}
-    if template == 'us':
-        OPTIONS['papersize'] = 'letter'
+    # Different formatting for different providers
+    if provider == "lp1":
+        # sciencesoft.at online latex compiler
+        OPTIONS = {'src' : tex,
+                   'dev' : 'pdfwrite',
+                   'papersize' : 'a4',
+                   'dpi' : dpi,
+                   'result' : 'false',
+                   'template' : 'no'}
+        if template == 'us':
+            OPTIONS['papersize'] = 'letter'
 
-    if out is None:
-        CHARS = string.ascii_uppercase + string.digits
-        out = "LABELS_%s.pdf" % "".join( random.choice(CHARS) for _ in range(6) )
-    URL = 'http://sciencesoft.at/image/latexurl/%s' % out
+        if out is None:
+            CHARS = string.ascii_uppercase + string.digits
+            out = "LABELS_%s.pdf" % "".join( random.choice(CHARS) for _ in range(6) )
+        URL = 'http://sciencesoft.at/image/latexurl/%s' % out
+    elif provider == "tex.mendelu.cz":
+        # tex.mendelu.cz online latex compiler
+        OPTIONS = {'pole' : tex,
+                   'pdf' : 'PDF',
+                   'preklad' : 'latex',
+                   'pruchod' : 1,
+                   '.cgifields' : 'komprim'}
+        URL = 'https://tex.mendelu.cz/en/'
+    else:
+        raise Exception("Latex provider not known: '%s'" % provider)
     return URL, OPTIONS
     
