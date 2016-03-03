@@ -146,7 +146,6 @@ def matches_tag_thing(mod_string):
     tr_html_list = []
     td_html_list = []
     for mod in mod_string.split(' '):
-        mod = mod.strip(',.')
         mod = re.sub('[^\w:_-]+', '', mod)
         # compat stuff
         if mod == "WFF:DEAD":
@@ -159,11 +158,11 @@ def matches_tag_thing(mod_string):
             tr_html_list.append('class="text-warning"')
             td_html_list.append('<i class="icon-warning-sign"></i> ')
         else:  # new tag stuff
-            m = re.match("TAG:([0-9a-zA-Z])", mod)
+            m = re.match("TAG:([0-9a-zA-Z]+)", mod)
             if m:
                 tagname = m.groups()[0]
                 tr_html_list.append('')
-                td_html_list.append('<span class="badge">%s</span> ' % tagname)
+                td_html_list.append('<span class="label label-info">%s</span> ' % tagname)
     if tr_html_list:
         tr_html = tr_html_list[0]
     else:
