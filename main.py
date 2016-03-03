@@ -31,6 +31,7 @@ import labels
 import requests
 import datetime
 import json
+import re
 
 ### Debugging
 import pprint
@@ -141,9 +142,41 @@ def printerrors(prefix):
 # FINALLY, the web interface
 # RequestHandlers
 #
+def matches_tag_thing(mod_string):
+    tr_html_list = []
+    td_html_list = []
+    for mod in mod_string.split(' '):
+        mod = mod.strip(',.')
+        mod = re.sub('[^\w:_-]+', '', mod)
+        # compat stuff
+        if mod == "WFF:DEAD":
+            tr_html_list.append('class="text-error"')
+            td_html_list.append('<i class="icon-frown text-error"></i> ')
+        elif mod == "WFF:HOSPITAL":
+            tr_html_list.append('class="text-info"')
+            td_html_list.append('<i class="icon-ambulance"></i> ')
+        elif mod == "WFF:WARNING":
+            tr_html_list.append('class="text-warning"')
+            td_html_list.append('<i class="icon-warning-sign"></i> ')
+        else:  # new tag stuff
+            m = re.match("TAG:([0-9a-zA-Z])", mod)
+            if m:
+                tagname = m.groups()[0]
+                tr_html_list.append('')
+                td_html_list.append('<span class="badge">%s</span> ' % tagname)
+    if tr_html_list:
+        tr_html = tr_html_list[0]
+    else:
+        tr_html = ''
+    if td_html_list:
+        td_html = "".join(td_html_list)
+    else:
+        td_html = ''
+    return tr_html, td_html
 
 render = web.template.render('templates/', base='bslayout')
-render_wo_layout = web.template.render('templates/')
+render_wo_layout = web.template.render('templates/',
+                        globals={'matchtagthing': matches_tag_thing})
 
 class Index(FakeWebapp2RequestHandler):
     @printerrors('Stardate 1034.5: we encountered a')
