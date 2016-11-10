@@ -6,6 +6,12 @@ import datetime
 import string
 import random
 import requests
+try:
+    import requests_toolbelt.adapters.appengine
+except ImportError:
+    pass
+else:
+    requests_toolbelt.adapters.appengine.monkeypatch()
 import re
 
 def replace_latex_cmd_chars(string):
