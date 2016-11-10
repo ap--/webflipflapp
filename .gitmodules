@@ -1,3 +1,3 @@
 [submodule "lib/apgooglelayer"]
 	path = lib/apgooglelayer
-	url = git@github.com:ap--/apgooglelayer.git
+	url = git@bitbucket.org:ap--/apgooglelayer.git
