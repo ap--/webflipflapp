@@ -6,7 +6,7 @@ import os
 
 ### WebServer
 import web
-from oauth2client.appengine import OAuth2DecoratorFromClientSecrets
+from oauth2client.contrib.appengine import OAuth2DecoratorFromClientSecrets
 from oauth2client_webpy_bridge import FakeWebapp2RequestHandler
 import fakespreadsheets
 
