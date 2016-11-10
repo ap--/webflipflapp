@@ -80,47 +80,11 @@ footable: $(FOOTABLEJS) $(FOOTABLECSS) $(FOOTABLEFONTS)
 #------------------------------------------------------------------------------
 # DOWNLOAD LIBS
 #
-.PHONY: libs
-libs: libwebpy libgdata libgae librequests
 LIB=lib
+.PHONY: libs
+libs:
+	pip install -t lib/ -r requirements.txt
 
-WEBPY=web.py-0.37
-.PHONY: libwebpy
-libwebpy:
-	wget -O - http://webpy.org/static/$(WEBPY).tar.gz | tar -xvzf -
-	mv $(WEBPY)/web $(LIB)/
-	rm -rf $(WEBPY)
-
-GDATA=gdata-2.0.18
-.PHONY: libgdata
-libgdata:
-	wget -O - http://gdata-python-client.googlecode.com/files/$(GDATA).tar.gz  | tar -xvzf -
-	mv $(GDATA)/src/* $(LIB)/
-	rm -rf $(GDATA)
-
-GAE=google-api-python-client-gae-1.2
-.PHONY: libgae
-libgae:
-	wget http://google-api-python-client.googlecode.com/files/$(GAE).zip
-	unzip $(GAE).zip -d $(LIB)/
-	rm -f $(GAE).zip
-
-REQUESTS=3327652623415cfa408ef54898071f28e9600ef6
-.PHONY: librequests
-librequests:
-	wget https://github.com/kennethreitz/requests/archive/$(REQUESTS).zip
-	unzip $(REQUESTS).zip
-	mv requests-$(REQUESTS)/requests $(LIB)/
-	rm -f $(REQUESTS).zip
-	rm -rf requests-$(REQUESTS)
-
-.PHONY: cleanlibs
-
-cleanlibs:
-	rm -rf lib/web
-	rm -rf lib/gdata lib/atom
-	rm -rf lib/requests
-	rm -rf lib/apiclient lib/httplib2 lib/oauth2client lib/uritemplate
 
 #------------------------------------------------------------------------------
 # GENERATE web.py templates

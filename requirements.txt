@@ -1,0 +1,5 @@
+web.py
+google-api-python-client
+gdata
+xlrd
+requests
