@@ -6,12 +6,10 @@ import datetime
 import string
 import random
 import requests
-try:
-    import requests_toolbelt.adapters.appengine
-except ImportError:
-    pass
-else:
-    requests_toolbelt.adapters.appengine.monkeypatch()
+# THIS IS A GOOGLE APPENGINE WORKAROUND
+import requests_toolbelt.adapters.appengine
+requests_toolbelt.adapters.appengine.monkeypatch()
+# /GAE
 import re
 
 def replace_latex_cmd_chars(string):
