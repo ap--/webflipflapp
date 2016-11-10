@@ -8,7 +8,6 @@ meremember:
 	@echo "   > local"
 	@echo "   > gae"
 	@echo "  setup css and js"
-	@echo "   > css"
 	@echo "   > js"
 	@echo "   > footable"
 	@echo "  install python libs"
@@ -16,7 +15,7 @@ meremember:
 	@echo "  generate templates"
 	@echo "   > templates"
 
-all: libs css js footable templates
+all: libs js footable templates
 
 #------------------------------------------------------------------------------
 # switch between local and gae client_secrets
@@ -26,20 +25,6 @@ local:
 	cp client_secrets.json-local client_secrets.json
 gae:
 	cp client_secrets.json-gae client_secrets.json
-
-#------------------------------------------------------------------------------
-# CREATE minified CSS
-#
-CSSSRC=css
-CSSDEST=static/css
-CSSSRCFILES = $(wildcard $(CSSSRC)/*.css)
-CSSDESTFILES = $(patsubst $(CSSSRC)/%.css, $(CSSDEST)/%.min.css, $(CSSSRCFILES))
-
-.PHONY: css
-css: $(CSSDESTFILES)
-
-$(CSSDEST)/%.min.css: $(CSSSRC)/%.css
-	yui-compressor $< -o $@
 
 #------------------------------------------------------------------------------
 # CREATE minified JS
@@ -53,7 +38,7 @@ JSDESTFILES = $(patsubst $(JSSRC)/%.js, $(JSDEST)/%.min.js, $(JSSRCFILES))
 js: $(JSDESTFILES)
 
 $(JSDEST)/%.min.js: $(JSSRC)/%.js
-	yui-compressor $< -o $@
+	yuicompressor $< -o $@
 
 #------------------------------------------------------------------------------
 # DOWNLOAD FOOTABLE
