@@ -12,7 +12,6 @@ import fakespreadsheets
 
 
 ### Google API interfaces
-from apiclient.discovery import build
 import apgooglelayer.drive
 import apgooglelayer.calendar
 from apgooglelayer.spreadsheets.oauth2client_gdata_bridge import OAuth2BridgeError
@@ -26,8 +25,6 @@ from google.appengine.api import users
 ### Flyflippingdstuff
 import flyboxes
 import labels
-import requests
-import datetime
 import json
 import re
 
