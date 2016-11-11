@@ -22,6 +22,8 @@ lib/pyasn1_modules-0.0.8.dist-info/
 lib/pyasn1_modules/
 lib/requests
 lib/requests-2.11.1.dist-info/
+lib/requests_toolbelt-0.7.0.dist-info/
+lib/requests_toolbelt/
 lib/rsa-3.4.2.dist-info/
 lib/rsa/
 lib/six-1.10.0.dist-info/
