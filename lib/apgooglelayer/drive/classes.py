@@ -49,6 +49,10 @@ class GoogleDrive(object):
         # DATA: all spreadsheets and folders that are not deleted
         DATA = self.all_files(http=http, fields=_fields, q=myquery)
 
+        # if user has no matching item in their google drive
+        if len(DATA) == 0:
+            return SimpleTree()
+
         # try to guess root_id:
         GUESS = []
         for d in DATA:
