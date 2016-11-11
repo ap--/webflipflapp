@@ -62,11 +62,9 @@ class GoogleDrive(object):
         GUESS = set(GUESS) # if there's only one possible solution, we're done.
         if len(GUESS) == 1:
             root_id, = GUESS
-        elif len(GUESS) > 1:
+        else:
             root_id = self.about(http=http,
                     fields='rootFolderId').pop('rootFolderId')
-        else:
-            raise GoogleDriveError("can't build tree without root!")
 
         # sort'em
         def recurse(START, T):
