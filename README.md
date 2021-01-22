@@ -1,8 +1,12 @@
-# webflipflapp.appspot.com
+# [webflipflapp.appspot.com](webflipflapp.appspot.com)
 
 This is a copy of the source code of a pdf label generating appspot app for fly stock management.
+
+I wrote this back in 2013 to help me with printing pdf labels from google drive sheets. In case the app is useful
+to you feel free to contact me.
+
 Because Google changed terms and conditions recently for appspot and Python 2.7 reached its end-of-life in 2020,
-this app might need a complete overhaul.
+this app might need a complete overhaul or might be taken offline in the future.
 
 
 ### Screenshots
