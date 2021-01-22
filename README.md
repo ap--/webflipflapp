@@ -1,4 +1,4 @@
-# [webflipflapp.appspot.com](webflipflapp.appspot.com)
+# [webflipflapp.appspot.com](https://webflipflapp.appspot.com)
 
 This is a copy of the source code of a pdf label generating appspot app for fly stock management.
 
